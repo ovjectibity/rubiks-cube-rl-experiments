@@ -1,0 +1,12 @@
+[package]
+name = "rubiks-cube-experiments"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+nalgebra = "0.33.2"
+tobj = "4.0.3"
+ahash = "0.8.12"
+libc = "0.2"
+tch = "0.20.0"
+rand = "0.9.1"
