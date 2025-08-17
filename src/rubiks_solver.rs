@@ -16,9 +16,10 @@ pub struct RubiksSolver {
 //Uses the policy gradient algorithm
 impl RubiksSolver {
     pub fn new(num_layers: u32,hidden_layer_dimension: u32,
-            num_epochs: u32,num_trajectories: u32,trajectory_depth: u32) -> Self {
+            num_epochs: u32,num_trajectories: u32,trajectory_depth: u32,
+            learning_rate: f64) -> Self {
         let pols = Self::init_policy(hidden_layer_dimension as i64,num_layers as i64);
-        let optim = nn::Adam::default().build(&pols.1,1e-3).unwrap();
+        let optim = nn::Adam::default().build(&pols.1,learning_rate).unwrap();
         RubiksSolver {
             policy: pols.0,
             num_layers: num_layers,
@@ -40,7 +41,7 @@ impl RubiksSolver {
             y = y.add(nn::linear(vs_p.clone(),hidden_layer_dimension,hidden_layer_dimension,Default::default())).
             add_fn(Tensor::relu);
         }
-        y = y.add(nn::linear(vs_p.clone(),hidden_layer_dimension,12,Default::default())).
+        y = y.add(nn::linear(vs_p.clone(),hidden_layer_dimension,13,Default::default())).
             add_fn(Tensor::relu).
             add_fn(|xs| {
                 xs.softmax(-1, tch::Kind::Float)
@@ -116,13 +117,13 @@ impl RubiksSolver {
 
     fn sample_action(probs: &Tensor) -> CubeMove {
         assert!(probs.dim() == 2);
-        println!("Sampling action from probs: {:?}",probs.size());
+        // println!("Sampling action from probs: {:?}",probs.size());
         let index = Self::sample_categorical(&Vec::<f32>::try_from(probs.squeeze()).unwrap());
         Self::index_cube_move(index as u32).unwrap()
     }
 
     fn sample_categorical(probabilities: &[f32]) -> usize {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let r: f32 = rng.random(); // random float in [0, 1)
         let mut cumulative = 0.0;
 
@@ -334,28 +335,61 @@ impl RubiksSolver {
     //Shape of the logits: [num_trajectory, trajectory_depth, num_moves]
     //Shape of the moves is [num_trajectory, trajectory_depth]
     //Output tensor is [num_trajectory, trajectory_depth, 1]
-    fn log_probs_policy(logits: &Tensor,mv: &Tensor) -> Tensor {
+    fn log_probs_policy_mod(logits: &Tensor,mv: &Tensor) -> Tensor {
         // logits.get(Self::get_cube_move_index(&mv)).log()
-        println!("Size of logits & moves {:?} {:?} {:?}",logits.size(),mv.size(),mv.unsqueeze(2));
-        mv.print();
-        logits.print();
-        let logits_m = logits.gather(2,&mv.unsqueeze(2),false); 
-        //.log().sum(tch::Kind::Float);
-        println!("Size of sampled logits tensor {:?}",logits_m.size()); 
-        logits_m.squeeze()
+        // println!("Size of logits & moves {:?} {:?} {:?}",logits.size(),mv.size(),mv.unsqueeze(2));
+        // mv.print();
+        // logits.print();
+        let log_logits_m = logits.gather(2,&mv.unsqueeze(2),false);
+        //.sum(tch::Kind::Float);
+        // println!("Size of sampled logits tensor {:?}",log_logits_m.size()); 
+        // log_logits_m.print();
+        log_logits_m
     }
 
     //log_probs shape:  [num_trajectory, trajectory_depth, 1]
     //Rewards shape: [num_trajectory, 1]
     //Output: [1]
-    fn policy_loss(log_probs: Tensor, rewards: Tensor) -> Tensor {
-        println!("Tensors for calculating policy loss, log_probs: {:?} & rewards: {:?}",
-                log_probs.size(),rewards.size());
-        let weighted_rewards = log_probs * rewards;
-        println!("Weighted rewards: {:?}",weighted_rewards);
-        weighted_rewards.print();
+    fn expected_policy_reward_mod(log_probs: Tensor, rewards: Tensor) -> Tensor {
+        // println!("Tensors for calculating policy loss, log_probs: {:?} & rewards: {:?}",
+        //         log_probs.size(),rewards.size());
+        //Multiplying the move probabilities for each trajectory: 
+        let weighted_rewards = 
+            log_probs.squeeze_dim(2).prod_dim_int(1,false,tch::Kind::Float) * rewards;
+        // println!("Weighted rewards: {:?}",weighted_rewards);
+        // weighted_rewards.print();
         // weighted_rewards.mean_out(&weighted_rewards, 0, true, tch::Kind::Float);
-        weighted_rewards.mean_dim(0,true,tch::Kind::Float)
+        - weighted_rewards.sum_dim_intlist(0,true,tch::Kind::Float)
+    }
+
+    //Shape of the logits: [num_trajectory, trajectory_depth, num_moves]
+    //Shape of the moves is [num_trajectory, trajectory_depth]
+    //Output tensor is [num_trajectory, trajectory_depth, 1]
+    fn log_probs_policy_su(logits: &Tensor,mv: &Tensor) -> Tensor {
+        // logits.get(Self::get_cube_move_index(&mv)).log()
+        // println!("Size of logits & moves {:?} {:?} {:?}",logits.size(),mv.size(),mv.unsqueeze(2));
+        // mv.print();
+        // logits.print();
+        let log_logits_m = logits.gather(2,&mv.unsqueeze(2),false).log();
+        //.sum(tch::Kind::Float);
+        // println!("Size of sampled logits tensor {:?}",log_logits_m.size()); 
+        // log_logits_m.print();
+        log_logits_m
+    }
+
+    //log_probs shape:  [num_trajectory, trajectory_depth, 1]
+    //Rewards shape: [num_trajectory, 1]
+    //Output: [1]
+    fn expected_policy_reward_su(log_probs: Tensor, rewards: Tensor) -> Tensor {
+        // println!("Tensors for calculating policy loss, log_probs: {:?} & rewards: {:?}",
+        //         log_probs.size(),rewards.size());
+        //Summing the log probabilities for each trajectory: 
+        let weighted_rewards = 
+            log_probs.squeeze_dim(2).sum_dim_intlist(1,false,tch::Kind::Float) * rewards;
+        // println!("Weighted rewards: {:?}",weighted_rewards);
+        // weighted_rewards.print();
+        // weighted_rewards.mean_out(&weighted_rewards, 0, true, tch::Kind::Float);
+        - weighted_rewards.mean_dim(0,true,tch::Kind::Float)
     }
 
     pub fn gen_trajectories(&self,cube_start: RubiksCube) -> 
@@ -418,7 +452,8 @@ impl RubiksSolver {
         //Run the backward prop 
         let logits = self.policy.forward(&input_t);
         //SOLVE/POSSIBLE BUG: Are we trying to maximize or minimise here?   
-        let expected_reward = Self::policy_loss(Self::log_probs_policy(&logits, &mv_t), rewards_t.squeeze());
+        let expected_reward = Self::expected_policy_reward_mod(
+            Self::log_probs_policy_mod(&logits, &mv_t), rewards_t.squeeze());
         println!("Loss tensor: {:?}",expected_reward.size());
         expected_reward.print();
         self.optim.zero_grad();
