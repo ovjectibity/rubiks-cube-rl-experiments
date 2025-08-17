@@ -156,7 +156,7 @@ impl RubiksSolver {
         //BUG/ISSUE: Possible issue here, when a cube is scrambled further away the 
         //the reward is being increased from the previous state: 
         //For example no_op on the previous cube would get the reward as 0. 
-        new_score //- old_score
+        new_score - old_score
     }
 
     fn sample_action(probs: &Tensor) -> CubeMove {
@@ -403,7 +403,7 @@ impl RubiksSolver {
         println!("Tensors for calculating policy loss, log_probs: {:?} & rewards: {:?}",
                 log_probs.size(),rewards.size());
         println!("Unweighted rewards: {:?}",rewards.size());
-        rewards.print();
+        // rewards.print();
         //Summing the log probabilities for each trajectory: 
         let weighted_rewards = 
             (log_probs.squeeze_dim(2) * rewards).sum_dim_intlist(1,false,tch::Kind::Float);
@@ -462,7 +462,7 @@ impl RubiksSolver {
         //Run the backward prop 
         //BUG HERE: the starting point is not being used, instead starting point is the next step
         let expected_reward = Self::expected_policy_reward_su(
-            Self::log_probs_policy_su(&all_traj_logits, &mv_t), rewards_t.squeeze());
+            Self::log_probs_policy_su(&all_traj_logits, &mv_t), rewards_t);
         println!("Loss tensor: {:?}",expected_reward.size());
         expected_reward.print();
         self.optim.zero_grad();

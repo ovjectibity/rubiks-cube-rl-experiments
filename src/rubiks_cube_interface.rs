@@ -17,8 +17,8 @@ impl RubiksCubeModelInterface {
         let num_trajectories = 50;
         RubiksCubeModelInterface {
             rubiks_cube: RubiksCube::new(),
-            solver: RubiksSolver::new(5,500,
-                50,num_trajectories,1,
+            solver: RubiksSolver::new(15,500,
+                5,num_trajectories,1,
             1e-3),
             num_trajectories: num_trajectories
         }
@@ -38,7 +38,10 @@ impl RubiksCubeModelInterface {
         let _num_starting_points = num_starting_points;
         let mut fixed_moves: Vec<CubeMove> = Vec::new();
         for i in 0..turns {
-            fixed_moves.push(Self::random_sample_move());
+            fixed_moves.push(
+                Self::random_sample_move()
+                // CubeMove::BPlus
+            );
         }
 
         for i in 0.._num_starting_points {
@@ -79,12 +82,15 @@ impl RubiksCubeModelInterface {
     pub fn test_policy(&mut self) {
         // Display the trajectories: 
         //Scramble self cube: 
-        let r_cubes_moves = 
+        let r_cubes_moves: (Vec<RubiksCube>, Vec<Vec<CubeMove>>) = 
             Self::randomly_scramble_cube(&mut self.rubiks_cube, 
                 1,1,false);
             println!("The random scrambling applied these moves: {:?} for testing",
                 r_cubes_moves.1);
         let r_cube = r_cubes_moves.0.get(0).expect("Expected cube");
+
+        // let mut r_cube = RubiksCube::new();
+        // r_cube.update_rep(CubeMove::BPlus);
         let mv = [self.solver.generate_move(r_cube),
                                 self.solver.generate_move(r_cube),
                                 self.solver.generate_move(r_cube),
