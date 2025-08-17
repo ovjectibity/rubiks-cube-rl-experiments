@@ -335,36 +335,6 @@ impl RubiksSolver {
     //Shape of the logits: [num_trajectory, trajectory_depth, num_moves]
     //Shape of the moves is [num_trajectory, trajectory_depth]
     //Output tensor is [num_trajectory, trajectory_depth, 1]
-    fn log_probs_policy_mod(logits: &Tensor,mv: &Tensor) -> Tensor {
-        // logits.get(Self::get_cube_move_index(&mv)).log()
-        // println!("Size of logits & moves {:?} {:?} {:?}",logits.size(),mv.size(),mv.unsqueeze(2));
-        // mv.print();
-        // logits.print();
-        let log_logits_m = logits.gather(2,&mv.unsqueeze(2),false);
-        //.sum(tch::Kind::Float);
-        // println!("Size of sampled logits tensor {:?}",log_logits_m.size()); 
-        // log_logits_m.print();
-        log_logits_m
-    }
-
-    //log_probs shape:  [num_trajectory, trajectory_depth, 1]
-    //Rewards shape: [num_trajectory, 1]
-    //Output: [1]
-    fn expected_policy_reward_mod(log_probs: Tensor, rewards: Tensor) -> Tensor {
-        // println!("Tensors for calculating policy loss, log_probs: {:?} & rewards: {:?}",
-        //         log_probs.size(),rewards.size());
-        //Multiplying the move probabilities for each trajectory: 
-        let weighted_rewards = 
-            log_probs.squeeze_dim(2).prod_dim_int(1,false,tch::Kind::Float) * rewards;
-        // println!("Weighted rewards: {:?}",weighted_rewards);
-        // weighted_rewards.print();
-        // weighted_rewards.mean_out(&weighted_rewards, 0, true, tch::Kind::Float);
-        - weighted_rewards.sum_dim_intlist(0,true,tch::Kind::Float)
-    }
-
-    //Shape of the logits: [num_trajectory, trajectory_depth, num_moves]
-    //Shape of the moves is [num_trajectory, trajectory_depth]
-    //Output tensor is [num_trajectory, trajectory_depth, 1]
     fn log_probs_policy_su(logits: &Tensor,mv: &Tensor) -> Tensor {
         // logits.get(Self::get_cube_move_index(&mv)).log()
         // println!("Size of logits & moves {:?} {:?} {:?}",logits.size(),mv.size(),mv.unsqueeze(2));
@@ -452,8 +422,8 @@ impl RubiksSolver {
         //Run the backward prop 
         let logits = self.policy.forward(&input_t);
         //SOLVE/POSSIBLE BUG: Are we trying to maximize or minimise here?   
-        let expected_reward = Self::expected_policy_reward_mod(
-            Self::log_probs_policy_mod(&logits, &mv_t), rewards_t.squeeze());
+        let expected_reward = Self::expected_policy_reward_su(
+            Self::log_probs_policy_su(&logits, &mv_t), rewards_t.squeeze());
         println!("Loss tensor: {:?}",expected_reward.size());
         expected_reward.print();
         self.optim.zero_grad();

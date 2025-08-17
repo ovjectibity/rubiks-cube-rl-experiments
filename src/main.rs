@@ -8,4 +8,5 @@ fn main() {
     //Start the training: 
     let mut intf = RubiksCubeModelInterface::new();
     intf.train_policy();
+    intf.test_policy();
 }
