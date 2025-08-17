@@ -1,20 +1,26 @@
+use core::num;
+
 use crate::rubiks_solver::RubiksSolver;
 use crate::rubiks::RubiksCube;
 use crate::rubiks::CubeMove;
+use crate::rubiks_solver::Trajectory;
 use rand::Rng;
 
 pub struct RubiksCubeModelInterface {
     rubiks_cube: RubiksCube,
-    solver: RubiksSolver
+    solver: RubiksSolver,
+    num_trajectories: u32
 }
 
 impl RubiksCubeModelInterface {
     pub fn new() -> Self {
+        let num_trajectories = 50;
         RubiksCubeModelInterface {
             rubiks_cube: RubiksCube::new(),
-            solver: RubiksSolver::new(5,100,
-                200,100,1,
-            1e-3)
+            solver: RubiksSolver::new(5,500,
+                50,num_trajectories,1,
+            1e-3),
+            num_trajectories: num_trajectories
         }
     }
 
@@ -25,15 +31,32 @@ impl RubiksCubeModelInterface {
         mv.expect("Expected move")
     }
 
-    fn randomly_scramble_cube(cube: &RubiksCube,turns: u32) -> 
-        Vec<(RubiksCube,CubeMove)> {
-        let mut cubes_moves = Vec::new();
+    fn randomly_scramble_cube(cube: &RubiksCube,
+        num_starting_points: u32,turns: u32, same_end: bool) -> 
+        (Vec<RubiksCube>,Vec<Vec<CubeMove>>) {
+        let (mut cubes,mut moves_l) = (Vec::new(),Vec::new());
+        let _num_starting_points = num_starting_points;
+        let mut fixed_moves: Vec<CubeMove> = Vec::new();
         for i in 0..turns {
-            let mv = Self::random_sample_move();
-            let cube = cube.apply_move(mv.clone());
-            cubes_moves.push((cube,mv));
+            fixed_moves.push(Self::random_sample_move());
         }
-        cubes_moves
+
+        for i in 0.._num_starting_points {
+            let mut cube = cube.clone();
+            let mut moves = Vec::new();
+            for i in 0..turns {
+                let mv = if !same_end {
+                    Self::random_sample_move()
+                } else {
+                    fixed_moves.get(i as usize).expect("Expected move index").clone()
+                };
+                moves.push(mv.clone());
+                cube.update_rep(mv.clone());
+            }
+            cubes.push(cube);
+            moves_l.push(moves);
+        }
+        (cubes,moves_l)
     }
 
     pub fn test_logits(&self) {
@@ -48,7 +71,7 @@ impl RubiksCubeModelInterface {
     pub fn test_reward_alloc(&self) {
         // Test reward allocation: 
         let mut new_c = self.rubiks_cube.apply_move(CubeMove::BMinus);
-        new_c.update_rep(CubeMove::BPlus);
+        new_c.update_rep(CubeMove::FMinus);
         let r = RubiksSolver::get_reward(&new_c,&self.rubiks_cube);
         println!("Received reward: {:?}",r);
     }
@@ -56,18 +79,19 @@ impl RubiksCubeModelInterface {
     pub fn test_policy(&mut self) {
         // Display the trajectories: 
         //Scramble self cube: 
-        let r_cubes_moves = Self::randomly_scramble_cube(&mut self.rubiks_cube, 1);
-            let r_cubes_move = r_cubes_moves.get(0).
-                expect("Expected cube & move at index 0");
+        let r_cubes_moves = 
+            Self::randomly_scramble_cube(&mut self.rubiks_cube, 
+                1,1,false);
             println!("The random scrambling applied these moves: {:?} for testing",
-                r_cubes_move.1);
-        let mv = [self.solver.generate_move(&r_cubes_move.0),
-                                self.solver.generate_move(&r_cubes_move.0),
-                                self.solver.generate_move(&r_cubes_move.0),
-                                self.solver.generate_move(&r_cubes_move.0)];
+                r_cubes_moves.1);
+        let r_cube = r_cubes_moves.0.get(0).expect("Expected cube");
+        let mv = [self.solver.generate_move(r_cube),
+                                self.solver.generate_move(r_cube),
+                                self.solver.generate_move(r_cube),
+                                self.solver.generate_move(r_cube)];
         // let rcb2 = self.rubiks_cube.apply_move(mv.clone());
         println!("Got the cubemove from trained policy: {:?} {:?} {:?} {:?}",mv[0],mv[1],mv[2],mv[3]);
-        let logits = self.solver.generate_move_logits(&r_cubes_move.0);
+        let logits = self.solver.generate_move_logits(r_cube);
         // println!("Got the cubemove logits from trained policy: {}",logits.values());
         println!("Printing logits:");
         logits.print();
@@ -98,14 +122,14 @@ impl RubiksCubeModelInterface {
             println!("Training {} epoch",i);
             //Start with a different starting point for each epoch: 
             let r_cubes_moves = 
-                Self::randomly_scramble_cube(&mut self.rubiks_cube, 1);
-            let r_cubes_move = r_cubes_moves.get(0).
-                expect("Expected cube & move at index 0");
+                Self::randomly_scramble_cube(
+                    &mut self.rubiks_cube, 
+                    self.num_trajectories,1,false);
             println!("The random scrambling applied these moves: {:?} for training epoch {:?}",
-                r_cubes_move.1,i);
+                r_cubes_moves.1,i);
 
-            let trajs: Vec<(Vec<CubeMove>, Vec<RubiksCube>, Vec<f32>)> = 
-                self.solver.gen_trajectories(r_cubes_move.0.clone());
+            let trajs: Vec<Trajectory> = 
+                self.solver.gen_trajectories(r_cubes_moves.0.clone());
             // println!("Trajectories: {:?}",trajs);
             //TODO: Optimise this, forward pass in both gen_traj & training
             self.solver.train_an_epoch(trajs);

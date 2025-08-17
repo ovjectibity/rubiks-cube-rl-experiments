@@ -1,6 +1,35 @@
 use rand::Rng;
-use tch::{nn,Tensor,nn::Module,nn::Adam,nn::OptimizerConfig};
+use tch::{nn,Tensor,nn::Module,nn::Adam,nn::OptimizerConfig,no_grad};
 use crate::rubiks::{CornerSlot, CubeMove, Cubelet, FaceColor, RubiksCube, SlottedCubelet};
+
+pub struct Trajectory {
+    moves: Vec<CubeMove>,
+    //Shape of logits: [trajectory_depth,num_possible_moves]
+    logits: Tensor,
+    rewards: Vec<f32>
+}
+
+impl Trajectory {
+    fn new(moves: Vec<CubeMove>,logits: Tensor,rewards: Vec<f32>) -> Self {
+        let mut traj = Trajectory { 
+            moves: moves, 
+            logits: logits, 
+            rewards: rewards
+        };
+        traj.compute_rtg();
+        traj
+    }
+
+    fn compute_rtg(&mut self) {
+        let mut acc = 0.0;
+        let mut rtgs: Vec<f32> = self.rewards.iter().rev().map(|reward| {
+            acc += reward;
+            acc
+        }).collect();
+        rtgs.reverse();
+        self.rewards = rtgs;
+    }
+}
 
 pub struct RubiksSolver {
     policy: nn::Sequential,
@@ -20,6 +49,17 @@ impl RubiksSolver {
             learning_rate: f64) -> Self {
         let pols = Self::init_policy(hidden_layer_dimension as i64,num_layers as i64);
         let optim = nn::Adam::default().build(&pols.1,learning_rate).unwrap();
+        //Initialise the tensors uniformly in the policy network: 
+        no_grad(|| {
+            for (name, mut tensor) in pols.1.variables() {
+                if name.ends_with("weight") {
+                    tensor.uniform_(-0.05, 0.05);     // in-place
+                } else if name.ends_with("bias") {
+                    tensor.zero_();
+                }
+            }
+        });
+
         RubiksSolver {
             policy: pols.0,
             num_layers: num_layers,
@@ -67,7 +107,7 @@ impl RubiksSolver {
     }
 
     pub fn get_score(cube: &RubiksCube) -> f32 {
-        let mut score = 0.0;
+        let mut score: f32 = 0.0;
         let solved_cube = RubiksCube::new();
         let face_strings = Self::get_face_strings();
         let scm = cube.cube_slot_map.borrow();
@@ -105,6 +145,7 @@ impl RubiksSolver {
             }
         }
         // println!("Score is {}",score);
+        // score.powi(2)
         (2.0 as f32).powf(score)
     }
 
@@ -112,7 +153,10 @@ impl RubiksSolver {
         let new_score = Self::get_score(cube_current);
         let old_score = Self::get_score(cube_previous);
         // println!("Getting reward as {:?} {:?}",new_score,old_score);
-        new_score - old_score
+        //BUG/ISSUE: Possible issue here, when a cube is scrambled further away the 
+        //the reward is being increased from the previous state: 
+        //For example no_op on the previous cube would get the reward as 0. 
+        new_score //- old_score
     }
 
     fn sample_action(probs: &Tensor) -> CubeMove {
@@ -311,25 +355,30 @@ impl RubiksSolver {
 
     //The generated tuple is (a,s,p_a,r_s)
     //TODO: Return the logits as well for collection
-    fn gen_trajectory(&self,cube_start: RubiksCube) -> (Vec<CubeMove>,Vec<RubiksCube>,Vec<f32>) {
+    fn gen_trajectory(&self,cube_start: RubiksCube) -> Trajectory {
         let mut trajectory_moves = Vec::new();
-        let mut trajectory_cubes = Vec::new();
         let mut trajectory_rewards = Vec::new();
+        let mut trajectory_logits = Tensor::empty([0], (tch::Kind::Float,tch::Device::Cpu));
         let mut current_cube = cube_start;
         for i in 0..self.trajectory_depth {
             let input = Self::gen_input_representation(&current_cube);
             let output = self.policy.forward(&input.transpose(0, 1));
+            // println!("Generated these logits when generating trajectory: {:?}",output.size());
+            // output.print();
             let mv = Self::sample_action(&output);
             let cube_t = current_cube.apply_move(mv.clone());
             let r_t = Self::get_reward(&cube_t,&current_cube);
-            // println!("Computed the reward to be: {} for mv {:?}",r_t,mv);
+            // println!("Computed the mv & the o to be: {} for mv {:?}",r_t,mv);
             trajectory_moves.push(mv);
-            trajectory_cubes.push(cube_t.clone());
-            //IMPROVEMENT: Rewards-to-go to be computed
+            trajectory_logits = tch::Tensor::concat(&[trajectory_logits,output], 0);
             trajectory_rewards.push(r_t);
             current_cube = cube_t;
         }
-        (trajectory_moves,trajectory_cubes,trajectory_rewards)
+        println!("Generated trajectory: {:?} & rewards: {:?} & trajectory logits: {:?}",
+            trajectory_moves,
+            trajectory_rewards,
+            trajectory_logits.size());
+        Trajectory::new(trajectory_moves,trajectory_logits,trajectory_rewards)
     }
 
     //Shape of the logits: [num_trajectory, trajectory_depth, num_moves]
@@ -337,37 +386,39 @@ impl RubiksSolver {
     //Output tensor is [num_trajectory, trajectory_depth, 1]
     fn log_probs_policy_su(logits: &Tensor,mv: &Tensor) -> Tensor {
         // logits.get(Self::get_cube_move_index(&mv)).log()
-        // println!("Size of logits & moves {:?} {:?} {:?}",logits.size(),mv.size(),mv.unsqueeze(2));
+        println!("Size of logits & moves {:?} {:?} {:?}",logits.size(),mv.size(),mv.unsqueeze(2));
         // mv.print();
         // logits.print();
         let log_logits_m = logits.gather(2,&mv.unsqueeze(2),false).log();
         //.sum(tch::Kind::Float);
-        // println!("Size of sampled logits tensor {:?}",log_logits_m.size()); 
+        println!("Size of sampled logits tensor {:?}",log_logits_m.size()); 
         // log_logits_m.print();
         log_logits_m
     }
 
     //log_probs shape:  [num_trajectory, trajectory_depth, 1]
-    //Rewards shape: [num_trajectory, 1]
+    //Rewards shape: [num_trajectory, trajectory_depth]
     //Output: [1]
     fn expected_policy_reward_su(log_probs: Tensor, rewards: Tensor) -> Tensor {
-        // println!("Tensors for calculating policy loss, log_probs: {:?} & rewards: {:?}",
-        //         log_probs.size(),rewards.size());
+        println!("Tensors for calculating policy loss, log_probs: {:?} & rewards: {:?}",
+                log_probs.size(),rewards.size());
+        println!("Unweighted rewards: {:?}",rewards.size());
+        rewards.print();
         //Summing the log probabilities for each trajectory: 
         let weighted_rewards = 
-            log_probs.squeeze_dim(2).sum_dim_intlist(1,false,tch::Kind::Float) * rewards;
-        // println!("Weighted rewards: {:?}",weighted_rewards);
+            (log_probs.squeeze_dim(2) * rewards).sum_dim_intlist(1,false,tch::Kind::Float);
+        println!("Weighted rewards: {:?}",weighted_rewards.size());
         // weighted_rewards.print();
-        // weighted_rewards.mean_out(&weighted_rewards, 0, true, tch::Kind::Float);
         - weighted_rewards.mean_dim(0,true,tch::Kind::Float)
     }
 
-    pub fn gen_trajectories(&self,cube_start: RubiksCube) -> 
-        Vec<(Vec<CubeMove>,Vec<RubiksCube>,Vec<f32>)> {
+    pub fn gen_trajectories(&self,cube_start: Vec<RubiksCube>) -> 
+        Vec<Trajectory> {
         let mut trajs = Vec::new();
         for i in 0..self.num_trajectories {
             //TODO: Can we avoid this clone?
-            let traj = self.gen_trajectory(cube_start.clone());
+            let traj = self.gen_trajectory(cube_start.get(i as usize).
+                expect("Expected start cube at position").clone());
             // println!("Generated the trajectory:{:?}",traj.0);
             trajs.push(traj);
         }
@@ -378,21 +429,19 @@ impl RubiksSolver {
     //Involves collection of n trajectories with m moves
     //Render those moves, with each new traj refresh all data 
     //Showcase that in the window 
-    pub fn train_an_epoch(&mut self,trajs: Vec<(Vec<CubeMove>,Vec<RubiksCube>,Vec<f32>)>) {
+    pub fn train_an_epoch(&mut self,trajs: Vec<Trajectory>) {
         //Collect rewards tensor
-        let rewards: Vec<f32> = trajs.iter().map(|(a,b,c)| {
-            c.iter().map(|e| {
-                e.clone()
-            }).sum()
+        let rewards: Vec<f32> = trajs.iter().flat_map(|trajectory| {
+            trajectory.rewards.clone()
         }).collect();
         let rewards_t = 
             Tensor::f_from_slice(&rewards).
             unwrap().
-            reshape(&[self.num_trajectories as i64,1]);
+            reshape(&[self.num_trajectories as i64,self.trajectory_depth as i64]);
 
         //Get move tensor:  
-        let move_indices_l: Vec<Vec<i64>> = trajs.iter().map(|(a,b,c)| {
-            a.iter().map(|f| {
+        let move_indices_l: Vec<Vec<i64>> = trajs.iter().map(|trajectory| {
+            trajectory.moves.iter().map(|f| {
                 Self::get_cube_move_index(f) as i64
             }).collect::<Vec<i64>>()
         }).collect();
@@ -405,25 +454,15 @@ impl RubiksSolver {
             reshape(&[self.num_trajectories as i64,self.trajectory_depth as i64]);
         
         //Get input tensor  of shape [num_trajectories, traj_depth, input]
-        let input_l: Vec<Vec<f32>> = trajs.iter().map(|(a,b,c)| {
-            b.iter().flat_map(|cube| {
-                Vec::<f32>::try_from(Self::gen_input_representation(cube).squeeze()).unwrap()
-            }).collect::<Vec<f32>>()
+        let all_traj_logits_l: Vec<&Tensor> = trajs.iter().map(|trajectory| {
+            &trajectory.logits
         }).collect();
-
-        let input: Vec<f32> = input_l.iter().flat_map(|e| {
-            e.clone()
-        }).collect();
-        let input_t = 
-            Tensor::f_from_slice(&input).
-            unwrap().
-            reshape(&[self.num_trajectories as i64,self.trajectory_depth as i64,54]);
+        let all_traj_logits: Tensor = Tensor::stack(&all_traj_logits_l, 0);
 
         //Run the backward prop 
-        let logits = self.policy.forward(&input_t);
-        //SOLVE/POSSIBLE BUG: Are we trying to maximize or minimise here?   
+        //BUG HERE: the starting point is not being used, instead starting point is the next step
         let expected_reward = Self::expected_policy_reward_su(
-            Self::log_probs_policy_su(&logits, &mv_t), rewards_t.squeeze());
+            Self::log_probs_policy_su(&all_traj_logits, &mv_t), rewards_t.squeeze());
         println!("Loss tensor: {:?}",expected_reward.size());
         expected_reward.print();
         self.optim.zero_grad();
