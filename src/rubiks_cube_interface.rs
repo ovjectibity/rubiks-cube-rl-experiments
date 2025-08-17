@@ -14,11 +14,11 @@ pub struct RubiksCubeModelInterface {
 
 impl RubiksCubeModelInterface {
     pub fn new() -> Self {
-        let num_trajectories = 50;
+        let num_trajectories = 20;
         RubiksCubeModelInterface {
             rubiks_cube: RubiksCube::new(),
             solver: RubiksSolver::new(15,500,
-                5,num_trajectories,1,
+                5,num_trajectories,10,
             1e-3),
             num_trajectories: num_trajectories
         }
@@ -47,6 +47,11 @@ impl RubiksCubeModelInterface {
         for i in 0.._num_starting_points {
             let mut cube = cube.clone();
             let mut moves = Vec::new();
+            //Have the first move be deterministic: 
+            // let first_mv = RubiksSolver::index_cube_move(i).expect("expected cube move");
+            // cubes.push(cube.apply_move(first_mv.clone()));
+            // moves.push(first_mv);
+
             for i in 0..turns {
                 let mv = if !same_end {
                     Self::random_sample_move()
