@@ -14,11 +14,11 @@ pub struct RubiksCubeModelInterface {
 
 impl RubiksCubeModelInterface {
     pub fn new() -> Self {
-        let num_trajectories = 20;
+        let num_trajectories = 400;
         RubiksCubeModelInterface {
             rubiks_cube: RubiksCube::new(),
-            solver: RubiksSolver::new(15,500,
-                5,num_trajectories,10,
+            solver: RubiksSolver::new(5,1000,
+                5,num_trajectories,1,
             1e-3),
             num_trajectories: num_trajectories
         }

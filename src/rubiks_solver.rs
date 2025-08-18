@@ -48,17 +48,8 @@ impl RubiksSolver {
             num_epochs: u32,num_trajectories: u32,trajectory_depth: u32,
             learning_rate: f64) -> Self {
         let pols = Self::init_policy(hidden_layer_dimension as i64,num_layers as i64);
-        let optim = nn::Adam::default().build(&pols.1,learning_rate).unwrap();
-        //Initialise the tensors uniformly in the policy network: 
-        no_grad(|| {
-            for (name, mut tensor) in pols.1.variables() {
-                if name.ends_with("weight") {
-                    tensor.uniform_(-0.05, 0.05);     // in-place
-                } else if name.ends_with("bias") {
-                    tensor.zero_();
-                }
-            }
-        });
+        let mut optim = nn::Adam::default().build(&pols.1,learning_rate).unwrap();
+        optim.set_weight_decay(1e-4);
 
         RubiksSolver {
             policy: pols.0,
@@ -86,6 +77,16 @@ impl RubiksSolver {
             add_fn(|xs| {
                 xs.softmax(-1, tch::Kind::Float)
             });
+        //Initialise the tensors uniformly in the policy network: 
+        no_grad(|| {
+            for (name, mut tensor) in vs.variables() {
+                if name.ends_with("weight") {
+                    tensor.uniform_(-0.05, 0.05);     // in-place
+                } else if name.ends_with("bias") {
+                    tensor.zero_();
+                }
+            }
+        });
         (y,vs)
     }
 
