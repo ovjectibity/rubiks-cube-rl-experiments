@@ -17,8 +17,8 @@ impl RubiksCubeModelInterface {
         let num_trajectories = 400;
         RubiksCubeModelInterface {
             rubiks_cube: RubiksCube::new(),
-            solver: RubiksSolver::new(5,1000,
-                5,num_trajectories,1,
+            solver: RubiksSolver::new(6,500,
+                30,num_trajectories,1,
             1e-3),
             num_trajectories: num_trajectories
         }
