@@ -182,6 +182,34 @@ impl RubiksSolver {
         probabilities.len() - 1
     }
 
+    fn get_face_colors_corner<'a>(face_colors: (&'a FaceColor,&'a FaceColor,&'a FaceColor),
+                        color_indices: (u32,u32,u32)) -> (&'a FaceColor,&'a FaceColor,&'a FaceColor) {
+        match color_indices {
+            (0,1,2) => (face_colors.0,face_colors.1,face_colors.2),
+            (0,2,1) => (face_colors.0,face_colors.2,face_colors.1),
+            (1,0,2) => (face_colors.1,face_colors.0,face_colors.2),
+            (1,2,0) => (face_colors.1,face_colors.2,face_colors.0),
+            (2,0,1) => (face_colors.2,face_colors.0,face_colors.1),
+            (2,1,0) => (face_colors.2,face_colors.1,face_colors.0),
+            _ => {
+                println!("BUG: Somethig very off about face colors");
+                (face_colors.0,face_colors.1,face_colors.2)
+            }
+        }
+    }
+
+    fn get_face_colors_edge<'a>(face_colors: (&'a FaceColor,&'a FaceColor),
+                        color_indices: (u32,u32)) -> (&'a FaceColor,&'a FaceColor) {
+        match color_indices {
+            (0,1) => (face_colors.0,face_colors.1),
+            (1,0) => (face_colors.1,face_colors.0),
+            _ => {
+                assert!(false,"BUG: Somethig very off about face colors");
+                (face_colors.0,face_colors.1)
+            }
+        }
+    }
+
     fn get_color_representation(color: &FaceColor) -> f32 {
         match color {
             FaceColor::Red => {
@@ -208,6 +236,7 @@ impl RubiksSolver {
     fn get_cubelet_representation(
         slotted_cubelet: &SlottedCubelet,
         cubelets: &[Cubelet;26]) -> Option<tch::Tensor> {
+        //BUG HERE: The representation is not checking the order of colors
         match slotted_cubelet {
             SlottedCubelet::Center(i) => {
                 let cubelet = &cubelets[i.clone() as usize];
@@ -221,21 +250,27 @@ impl RubiksSolver {
             },
             SlottedCubelet::Corner(c,i) => {
                 let cubelet = &cubelets[i.clone() as usize];
+                let color_indices = c.get_raw_color_indices();
                 match cubelet {
                     Cubelet::Corner(i,j,k) => {
-                        Some(tch::Tensor::from_slice(&[Self::get_color_representation(i),
-                                                    Self::get_color_representation(j),
-                                                    Self::get_color_representation(k)]))
+                        let face_colors = 
+                            Self::get_face_colors_corner((i,j,k), color_indices);
+                        Some(tch::Tensor::from_slice(&[Self::get_color_representation(face_colors.0),
+                                                    Self::get_color_representation(face_colors.1),
+                                                    Self::get_color_representation(face_colors.2)]))
                     },
                     _ => None
                 }
             },
             SlottedCubelet::Edge(c,i) => {
                 let cubelet = &cubelets[i.clone() as usize];
+                let color_indices = c.get_raw_color_indices();
                 match cubelet {
                     Cubelet::Edge(i,j) => {
-                        Some(tch::Tensor::from_slice(&[Self::get_color_representation(i),
-                                                    Self::get_color_representation(j)]))
+                        let face_colors = 
+                            Self::get_face_colors_edge((i,j), color_indices);
+                        Some(tch::Tensor::from_slice(&[Self::get_color_representation(face_colors.0),
+                                                    Self::get_color_representation(face_colors.1)]))
                     },
                     _ => None
                 }
