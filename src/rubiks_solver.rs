@@ -49,7 +49,7 @@ impl RubiksSolver {
             learning_rate: f64) -> Self {
         let pols = Self::init_policy(hidden_layer_dimension as i64,num_layers as i64);
         let mut optim = nn::Adam::default().build(&pols.1,learning_rate).unwrap();
-        optim.set_weight_decay(1e-4);
+        optim.set_weight_decay(1e-3);
 
         RubiksSolver {
             policy: pols.0,
@@ -192,7 +192,7 @@ impl RubiksSolver {
             (2,0,1) => (face_colors.2,face_colors.0,face_colors.1),
             (2,1,0) => (face_colors.2,face_colors.1,face_colors.0),
             _ => {
-                println!("BUG: Somethig very off about face colors");
+                assert!(false,"BUG: Somethig very off about face colors");
                 (face_colors.0,face_colors.1,face_colors.2)
             }
         }
@@ -245,7 +245,7 @@ impl RubiksSolver {
                         // tch::Tensor::empty(&[1,1],(tch::Kind::Float,tch::Device::Cpu));
                         Some(tch::Tensor::from_slice(&[Self::get_color_representation(i)]))
                     },
-                    _ => None
+                    _ => panic!("Expected corner cubelet")
                 }
             },
             SlottedCubelet::Corner(c,i) => {
@@ -259,7 +259,7 @@ impl RubiksSolver {
                                                     Self::get_color_representation(face_colors.1),
                                                     Self::get_color_representation(face_colors.2)]))
                     },
-                    _ => None
+                    _ => panic!("Expected corner cubelet")
                 }
             },
             SlottedCubelet::Edge(c,i) => {
@@ -272,7 +272,7 @@ impl RubiksSolver {
                         Some(tch::Tensor::from_slice(&[Self::get_color_representation(face_colors.0),
                                                     Self::get_color_representation(face_colors.1)]))
                     },
-                    _ => None
+                    _ => panic!("Expected corner cubelet")
                 }
             }
         }
@@ -370,7 +370,7 @@ impl RubiksSolver {
         }
     }
 
-    fn gen_input_representation(cube: &RubiksCube) -> tch::Tensor {
+    pub fn gen_input_representation(cube: &RubiksCube) -> tch::Tensor {
         let mut t = tch::Tensor::empty(&[0,1],(tch::Kind::Float,tch::Device::Cpu));
         let cube_slot_map = cube.cube_slot_map.borrow();
         let face_strings = Self::get_face_strings();
@@ -496,9 +496,9 @@ impl RubiksSolver {
         let all_traj_logits: Tensor = Tensor::stack(&all_traj_logits_l, 0);
 
         //Run the backward prop 
-        //BUG HERE: the starting point is not being used, instead starting point is the next step
         let expected_reward = Self::expected_policy_reward_su(
             Self::log_probs_policy_su(&all_traj_logits, &mv_t), rewards_t);
+        //TODO: Add term for mean entropy regularalization as well: 
         println!("Loss tensor: {:?}",expected_reward.size());
         expected_reward.print();
         self.optim.zero_grad();

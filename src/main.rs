@@ -9,5 +9,6 @@ fn main() {
     let mut intf = RubiksCubeModelInterface::new();
     intf.train_policy();
     intf.test_policy();
+    // intf.test_representation();
     // intf.test_reward_alloc();
 }

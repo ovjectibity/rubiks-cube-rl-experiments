@@ -1,5 +1,3 @@
-use core::num;
-
 use crate::rubiks_solver::RubiksSolver;
 use crate::rubiks::RubiksCube;
 use crate::rubiks::CubeMove;
@@ -17,9 +15,9 @@ impl RubiksCubeModelInterface {
         let num_trajectories = 400;
         RubiksCubeModelInterface {
             rubiks_cube: RubiksCube::new(),
-            solver: RubiksSolver::new(6,500,
+            solver: RubiksSolver::new(4,2000,
                 50,num_trajectories,1,
-            1e-3),
+            1e-4),
             num_trajectories: num_trajectories
         }
     }
@@ -76,6 +74,17 @@ impl RubiksCubeModelInterface {
         println!("Sum of logits: {:?}",logits.sum(tch::Kind::Float));
     }
 
+    pub fn test_representation(&self) {
+        let mut cube = RubiksCube::new();
+        let mut rep = RubiksSolver::gen_input_representation(&cube);
+        println!("Solved cube presentation is: {:?}",rep.size());
+        rep.print();
+        cube.update_rep(CubeMove::BPlus);
+        rep = RubiksSolver::gen_input_representation(&cube);
+        println!("BPlus cube presentation is: {:?}",rep.size());
+        rep.print();
+    }
+
     pub fn test_reward_alloc(&self) {
         // Test reward allocation: 
         let mut new_c = self.rubiks_cube.apply_move(CubeMove::BMinus);
@@ -89,24 +98,30 @@ impl RubiksCubeModelInterface {
         //Scramble self cube: 
         let r_cubes_moves: (Vec<RubiksCube>, Vec<Vec<CubeMove>>) = 
             Self::randomly_scramble_cube(&mut self.rubiks_cube, 
-                1,1,false);
+                10,1,false);
             println!("The random scrambling applied these moves: {:?} for testing",
                 r_cubes_moves.1);
-        let r_cube = r_cubes_moves.0.get(0).expect("Expected cube");
 
-        // let mut r_cube = RubiksCube::new();
-        // r_cube.update_rep(CubeMove::BPlus);
-        let mv = [self.solver.generate_move(r_cube),
-                                self.solver.generate_move(r_cube),
-                                self.solver.generate_move(r_cube),
-                                self.solver.generate_move(r_cube)];
-        // let rcb2 = self.rubiks_cube.apply_move(mv.clone());
-        println!("Got the cubemove from trained policy: {:?} {:?} {:?} {:?}",mv[0],mv[1],mv[2],mv[3]);
-        let logits = self.solver.generate_move_logits(r_cube);
-        // println!("Got the cubemove logits from trained policy: {}",logits.values());
-        println!("Printing logits:");
-        logits.print();
-        println!("Sum of logits: {:?}",logits.sum(tch::Kind::Float));
+        println!("Running the test loop now: ");
+        for i in 0..10 {
+            let r_cube = r_cubes_moves.0.get(i).expect("Expected cube");
+            let r_move = r_cubes_moves.1.get(i).expect("Expected move").
+                get(0).expect("Expected move");
+            println!("Scrambled cube used for test used this move: {:?}",r_move);
+            let mv = [self.solver.generate_move(r_cube),
+                                    self.solver.generate_move(r_cube),
+                                    self.solver.generate_move(r_cube),
+                                    self.solver.generate_move(r_cube)];
+            // let rcb2 = self.rubiks_cube.apply_move(mv.clone());
+            println!("Got the cubemove from policy: {:?} {:?} {:?} {:?}",mv[0],mv[1],mv[2],mv[3]);
+            let logits = self.solver.generate_move_logits(r_cube);
+            let policy_entropy = - (&logits.log() * &logits).sum_dim_intlist(1,false,tch::Kind::Float);
+            println!("The cross entropy for test cycle {:?} {:?}",i,policy_entropy.size());
+            policy_entropy.print();
+            println!("Printing logits: {:?}",logits.size());
+            logits.print();
+            println!("Sum of logits: {:?}",logits.sum(tch::Kind::Float));
+        }
 
         // let mv2 = self.solver.generate_move(&rcb2);
         // let rcb2 = self.rubiks_cube.apply_move(mv.clone());
