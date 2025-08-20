@@ -7,18 +7,21 @@ use rand::Rng;
 pub struct RubiksCubeModelInterface {
     rubiks_cube: RubiksCube,
     solver: RubiksSolver,
-    num_trajectories: u32
+    num_trajectories: u32,
+    trajectory_depth: u32
 }
 
 impl RubiksCubeModelInterface {
     pub fn new() -> Self {
         let num_trajectories = 400;
+        let trajectory_depth = 2;
         RubiksCubeModelInterface {
             rubiks_cube: RubiksCube::new(),
             solver: RubiksSolver::new(5,1500,
-                100,num_trajectories,1,
+                100,num_trajectories,trajectory_depth,
             1e-4),
-            num_trajectories: num_trajectories
+            num_trajectories: num_trajectories,
+            trajectory_depth: trajectory_depth
         }
     }
 
@@ -54,10 +57,6 @@ impl RubiksCubeModelInterface {
         for i in 0.._num_starting_points {
             let mut cube = cube.clone();
             let mut moves = Vec::new();
-            //Have the first move be deterministic: 
-            // let first_mv = RubiksSolver::index_cube_move(i).expect("expected cube move");
-            // cubes.push(cube.apply_move(first_mv.clone()));
-            // moves.push(first_mv);
 
             for i in 0..turns {
                 let mv = if !same_end {
@@ -104,55 +103,37 @@ impl RubiksCubeModelInterface {
 
     pub fn test_policy(&mut self) {
         // Display the trajectories: 
-        //Scramble self cube: 
         let r_cubes_moves: (Vec<RubiksCube>, Vec<Vec<CubeMove>>) = 
             Self::randomly_scramble_cube(&mut self.rubiks_cube, 
-                10,1,false);
+                10,self.trajectory_depth,false);
             println!("The random scrambling applied these moves: {:?} for testing",
                 r_cubes_moves.1);
 
         println!("Running the test loop now: ");
         for i in 0..10 {
-            let r_cube = r_cubes_moves.0.get(i).expect("Expected cube");
-            let r_move = r_cubes_moves.1.get(i).expect("Expected move").
-                get(0).expect("Expected move");
-            println!("Scrambled cube used for test used this move: {:?}",r_move);
-            let mv = [self.solver.generate_move(r_cube),
-                                    self.solver.generate_move(r_cube),
-                                    self.solver.generate_move(r_cube),
-                                    self.solver.generate_move(r_cube)];
-            // let rcb2 = self.rubiks_cube.apply_move(mv.clone());
-            println!("Got the cubemove from policy: {:?} {:?} {:?} {:?}",mv[0],mv[1],mv[2],mv[3]);
-            let logits = self.solver.generate_move_logits(r_cube);
-            let policy_entropy = - (&logits.log() * &logits).
-                sum_dim_intlist(1,false,tch::Kind::Float);
-            println!("The cross entropy for test cycle {:?} {:?}",i,policy_entropy.size());
-            policy_entropy.print();
-            println!("Printing logits: {:?}",logits.size());
-            logits.print();
-            println!("Sum of logits: {:?}",logits.sum(tch::Kind::Float));
-        }
+            let mut r_cube = r_cubes_moves.0.get(i).expect("Expected cube").clone();
+            let r_move = r_cubes_moves.1.get(i).expect("Expected move");
+            println!("Scrambled cube used for test {:?} used this moves: {:?}",i,r_move);
 
-        // let mv2 = self.solver.generate_move(&rcb2);
-        // let rcb2 = self.rubiks_cube.apply_move(mv.clone());
-        // self.apply_move(CubeMove::UPlus,true);
-        // self.apply_move(CubeMove::RPlus,true);
-        // self.apply_move(CubeMove::DPlus,true);
-        // self.apply_move(CubeMove::BPlus,true);
-        // self.apply_move(CubeMove::LPlus);
-        // self.apply_move(CubeMove::RPlus);
-        // self.apply_move(CubeMove::RPlus);
-        // self.apply_move(CubeMove::DPlus);
-        // self.apply_move(CubeMove::FMinus,false);
-        // self.apply_move(CubeMove::UMinus,false);
-        // self.rubiks_cube.apply_move(CubeMove::FPlus);
-        // self.rubiks_cube.apply_move(CubeMove::UPlus);
+            for j in 0..self.trajectory_depth {
+                let mv = self.solver.generate_move(&r_cube);
+                r_cube = r_cube.apply_move(mv.clone());
+                println!("Got the cubemove from policy: {:?} for turn {:?}",mv,j);
+
+                let logits = self.solver.generate_move_logits(&r_cube);
+                let policy_entropy = - (&logits.log() * &logits).
+                sum_dim_intlist(1,false,tch::Kind::Float);
+                println!("The cross entropy for turn {:?} {:?}",j,policy_entropy.size());
+                policy_entropy.print();
+                println!("Printing logits: {:?}",logits.size());
+                logits.print();
+                println!("Sum of logits: {:?}",logits.sum(tch::Kind::Float));
+            }
+        }
     } 
 
     pub fn train_policy(&mut self) {
         println!("Initializing policy training...");
-        // println!("Applying scrambling of length {}",1);
-        // self.rubiks_cube.update_rep(CubeMove::FPlus);
 
         for i in 0..self.solver.num_epochs {
             println!("Training {} epoch",i);
@@ -160,14 +141,13 @@ impl RubiksCubeModelInterface {
             let r_cubes_moves = 
                 Self::randomly_scramble_cube(
                     &mut self.rubiks_cube, 
-                    self.num_trajectories,1,false);
+                    self.num_trajectories,self.trajectory_depth,false);
             println!("The random scrambling applied these moves: {:?} for training epoch {:?}",
                 r_cubes_moves.1,i);
 
             let trajs: Vec<Trajectory> = 
                 self.solver.gen_trajectories(r_cubes_moves.0.clone());
             // println!("Trajectories: {:?}",trajs);
-            //TODO: Optimise this, forward pass in both gen_traj & training
             self.solver.train_an_epoch(trajs);
         }
     }
