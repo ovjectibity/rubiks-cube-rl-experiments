@@ -64,7 +64,7 @@ impl RubiksSolver {
     }
 
     fn init_policy(hidden_layer_dimension: i64,num_layers: i64) -> (nn::Sequential,nn::VarStore) {
-        let vs = nn::VarStore::new(tch::Device::Cpu);
+        let vs = nn::VarStore::new(tch::Device::Mps);
         let vs_p = vs.root();
         let mut y = nn::seq().add(nn::linear(vs_p.clone(), 324, hidden_layer_dimension, Default::default())).
             add_fn(Tensor::relu);
@@ -242,7 +242,7 @@ impl RubiksSolver {
                 let cubelet = &cubelets[i.clone() as usize];
                 match cubelet {
                     Cubelet::Center(i) => {
-                        // tch::Tensor::empty(&[1,1],(tch::Kind::Float,tch::Device::Cpu));
+                        // tch::Tensor::empty(&[1,1],(tch::Kind::Float,tch::Device::Mps));
                         Some(tch::Tensor::from_slice(&Self::get_color_representation(i)))
                     },
                     _ => panic!("Expected corner cubelet")
@@ -373,15 +373,16 @@ impl RubiksSolver {
     }
 
     pub fn gen_input_representation(cube: &RubiksCube) -> tch::Tensor {
-        let mut t = tch::Tensor::empty(&[0,1],(tch::Kind::Float,tch::Device::Cpu));
+        let mut t = tch::Tensor::empty(&[0,1],(tch::Kind::Float,tch::Device::Mps));
         let cube_slot_map = cube.cube_slot_map.borrow();
         let face_strings = Self::get_face_strings();
         for face_string in face_strings {
             let s = cube_slot_map.get(&face_string).expect("Expected cube slot to be available");
             let sc_t_o = Self::get_cubelet_representation(s, &cube.cubelets);
             if let Some(sc_t) = sc_t_o {
+                let mps_sc_t = sc_t.to_device(tch::Device::Mps);
                 // println!("Got cubelet {:?} {:?}",sc_t.dim(),sc_t);
-                t = tch::Tensor::cat(&[t,sc_t.unsqueeze(1)],0);
+                t = tch::Tensor::cat(&[t,mps_sc_t.unsqueeze(1)],0);
                 // println!("Got cubelet {:?} {:?}",t.dim(),t);
             } else {
                 println!("Warning; couldn't get cubelet representation. That wasn't supposed to happen.");
@@ -396,7 +397,7 @@ impl RubiksSolver {
     fn gen_trajectory(&self,cube_start: RubiksCube) -> Trajectory {
         let mut trajectory_moves = Vec::new();
         let mut trajectory_rewards = Vec::new();
-        let mut trajectory_logits = Tensor::empty([0], (tch::Kind::Float,tch::Device::Cpu));
+        let mut trajectory_logits = Tensor::empty([0], (tch::Kind::Float,tch::Device::Mps));
         let mut current_cube = cube_start;
         for i in 0..self.trajectory_depth {
             let input = Self::gen_input_representation(&current_cube);
@@ -424,10 +425,13 @@ impl RubiksSolver {
     //Output tensor is [num_trajectory, trajectory_depth, 1]
     fn log_probs_policy_su(logits: &Tensor,mv: &Tensor) -> Tensor {
         // logits.get(Self::get_cube_move_index(&mv)).log()
+        // println!("Move tensor on {:?}",mv.device());
+        // println!("Logits tensor on {:?}",logits.device());
         println!("Size of logits & moves {:?} {:?} {:?}",logits.size(),mv.size(),mv.unsqueeze(2));
+        let mps_mv = mv.to_device(tch::Device::Mps);
         // mv.print();
         // logits.print();
-        let log_logits_m = logits.gather(2,&mv.unsqueeze(2),false).log();
+        let log_logits_m = logits.gather(2,&mps_mv.unsqueeze(2),false).log();
         //.sum(tch::Kind::Float);
         println!("Size of sampled logits tensor {:?}",log_logits_m.size()); 
         // log_logits_m.print();
@@ -441,10 +445,11 @@ impl RubiksSolver {
         println!("Tensors for calculating policy loss, log_probs: {:?} & rewards: {:?}",
                 log_probs.size(),rewards.size());
         println!("Unweighted rewards: {:?}",rewards.size());
+        let mps_rewards = rewards.to_device(tch::Device::Mps);
         // rewards.print();
-        //Summing the log probabilities for each trajectory: 
+        //Summing the log probabilities for each trajectory:  
         let weighted_rewards = 
-            (log_probs.squeeze_dim(2) * rewards).sum_dim_intlist(1,false,tch::Kind::Float);
+            (log_probs.squeeze_dim(2) * mps_rewards).sum_dim_intlist(1,false,tch::Kind::Float);
         println!("Weighted rewards: {:?}",weighted_rewards.size());
         // weighted_rewards.print();
         - weighted_rewards.mean_dim(0,true,tch::Kind::Float)

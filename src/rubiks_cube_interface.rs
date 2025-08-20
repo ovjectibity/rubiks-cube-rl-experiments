@@ -13,12 +13,12 @@ pub struct RubiksCubeModelInterface {
 
 impl RubiksCubeModelInterface {
     pub fn new() -> Self {
-        let num_trajectories = 400;
+        let num_trajectories = 10;//400;
         let trajectory_depth = 2;
         RubiksCubeModelInterface {
             rubiks_cube: RubiksCube::new(),
-            solver: RubiksSolver::new(4,2500,
-                50,num_trajectories,trajectory_depth,
+            solver: RubiksSolver::new(4,5000,
+                5,num_trajectories,trajectory_depth,
             1e-4),
             num_trajectories: num_trajectories,
             trajectory_depth: trajectory_depth
