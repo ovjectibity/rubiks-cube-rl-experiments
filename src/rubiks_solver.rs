@@ -1,10 +1,11 @@
 use rand::Rng;
-use tch::{nn,Tensor,nn::Module,nn::Adam,nn::OptimizerConfig,no_grad};
-use crate::rubiks::{CornerSlot, CubeMove, Cubelet, FaceColor, RubiksCube, SlottedCubelet};
+use tch::{nn,Tensor,nn::Module,nn::OptimizerConfig,no_grad};
+use crate::rubiks::{CubeMove, Cubelet, FaceColor, RubiksCube, SlottedCubelet};
+use log::{info};
 
 pub struct Trajectory {
     moves: Vec<CubeMove>,
-    //Shape of logits: [trajectory_depth,num_possible_moves]
+    //Shape of logits: [num_possible_moves,trajectory_depth]
     logits: Tensor,
     rewards: Vec<f32>
 }
@@ -28,6 +29,14 @@ impl Trajectory {
         }).collect();
         rtgs.reverse();
         self.rewards = rtgs;
+    }
+
+    fn compute_avg_entropy(&self) -> f32 {
+        let entropy = - (&self.logits.log() * &self.logits).
+                        sum_dim_intlist(1,false,tch::Kind::Float).
+                        mean_dim(0,false,tch::Kind::Float);
+        let x: f32 = entropy.try_into().expect("Failed to convert tensor to vec");
+        x
     }
 }
 
@@ -380,14 +389,14 @@ impl RubiksSolver {
             let s = cube_slot_map.get(&face_string).expect("Expected cube slot to be available");
             let sc_t_o = Self::get_cubelet_representation(s, &cube.cubelets);
             if let Some(sc_t) = sc_t_o {
-                // println!("Got cubelet {:?} {:?}",sc_t.dim(),sc_t);
+                // info!("Got cubelet {:?} {:?}",sc_t.dim(),sc_t);
                 t = tch::Tensor::cat(&[t,sc_t.unsqueeze(1)],0);
-                // println!("Got cubelet {:?} {:?}",t.dim(),t);
+                // info!("Got cubelet {:?} {:?}",t.dim(),t);
             } else {
-                println!("Warning; couldn't get cubelet representation. That wasn't supposed to happen.");
+                info!("Warning; couldn't get cubelet representation. That wasn't supposed to happen.");
             }
         }
-        // println!("Returning input tensor {:?}",t);
+        // info!("Returning input tensor {:?}",t);
         t.to_device(tch::Device::Mps)
     }
 
@@ -401,12 +410,12 @@ impl RubiksSolver {
         for i in 0..self.trajectory_depth {
             let input = Self::gen_input_representation(&current_cube);
             let output = self.policy.forward(&input.transpose(0, 1));
-            // println!("Generated these logits when generating trajectory: {:?}",output.size());
-            // output.print();
+            // info!("Generated these logits when generating trajectory: {:?} {:?}",
+                // output.size(),output.print());
             let mv = Self::sample_action(&output);
             let cube_t = current_cube.apply_move(mv.clone());
             let r_t = Self::get_reward(&cube_t,&current_cube);
-            // println!("Computed the mv & the o to be: {} for mv {:?}",r_t,mv);
+            // info!("Computed the mv & the o to be: {} for mv {:?}",r_t,mv);
             trajectory_moves.push(mv);
             trajectory_logits = tch::Tensor::concat(&[trajectory_logits,output], 0);
             trajectory_rewards.push(r_t);
@@ -426,7 +435,7 @@ impl RubiksSolver {
             //TODO: Can we avoid this clone?
             let traj = self.gen_trajectory(cube_start.get(i as usize).
                 expect("Expected start cube at position").clone());
-            // println!("Generated the trajectory:{:?}",traj.0);
+            // info!("Generated the trajectory:{:?}",traj.0);
             trajs.push(traj);
         }
         trajs
@@ -437,16 +446,13 @@ impl RubiksSolver {
     //Output tensor is [num_trajectory, trajectory_depth, 1]
     fn log_probs_policy_su(logits: &Tensor,mv: &Tensor) -> Tensor {
         // logits.get(Self::get_cube_move_index(&mv)).log()
-        // println!("Move tensor on {:?}",mv.device());
-        // println!("Logits tensor on {:?}",logits.device());
-        println!("Size of logits & moves {:?} {:?} {:?}",logits.size(),mv.size(),mv.unsqueeze(2));
+        // info!("Move tensor on {:?} {:?}",mv.device(),mv);
+        // info!("Logits tensor on {:?} {:?}",logits.device(),logits);
+        info!("Size of logits & moves {:?} {:?} {:?}",logits.size(),mv.size(),mv.unsqueeze(2));
         let mps_mv = mv.to_device(tch::Device::Mps);
-        // mv.print();
-        // logits.print();
         let log_logits_m = logits.gather(2,&mps_mv.unsqueeze(2),false).log();
         //.sum(tch::Kind::Float);
-        println!("Size of sampled logits tensor {:?}",log_logits_m.size()); 
-        // log_logits_m.print();
+        info!("Size of sampled logits tensor {:?}",log_logits_m.size());//,log_logits_m); 
         log_logits_m
     }
 
@@ -454,17 +460,25 @@ impl RubiksSolver {
     //Rewards shape: [num_trajectory, trajectory_depth]
     //Output: [1]
     fn expected_policy_reward_su(log_probs: Tensor, rewards: Tensor) -> Tensor {
-        println!("Tensors for calculating policy loss, log_probs: {:?} & rewards: {:?}",
+        info!("Tensors for calculating policy loss, log_probs: {:?} & rewards: {:?}",
                 log_probs.size(),rewards.size());
-        println!("Unweighted rewards: {:?}",rewards.size());
+        info!("Unweighted rewards: {:?}",rewards.size());
         let mps_rewards = rewards.to_device(tch::Device::Mps);
         // rewards.print();
         //Summing the log probabilities for each trajectory:  
         let weighted_rewards = 
             (log_probs.squeeze_dim(2) * mps_rewards).sum_dim_intlist(1,false,tch::Kind::Float);
-        println!("Weighted rewards: {:?}",weighted_rewards.size());
+        info!("Weighted rewards: {:?}",weighted_rewards.size());
         // weighted_rewards.print();
         - weighted_rewards.mean_dim(0,true,tch::Kind::Float)
+    }
+
+    fn compute_mean_traj_entropy(trajs: &Vec<Trajectory>) -> f32 {
+        let mut cl = Vec::new();
+        for traj in trajs {
+            cl.push(traj.compute_avg_entropy());
+        }
+        cl.iter().sum::<f32>() / (cl.len() as f32)
     }
 
     //Running the training simulation involves for an epoc
@@ -505,8 +519,11 @@ impl RubiksSolver {
         let expected_reward = Self::expected_policy_reward_su(
             Self::log_probs_policy_su(&all_traj_logits, &mv_t), rewards_t);
         //TODO: Add term for mean entropy regularalization as well: 
-        println!("Loss tensor: {:?}",expected_reward.size());
-        expected_reward.print();
+        info!("Loss tensor: {:?} {:?}",
+            expected_reward.size(),
+            expected_reward.to_device(tch::Device::Cpu));
+        info!("Mean epoch policy entropy for the trajectories is: {:?}",
+            Self::compute_mean_traj_entropy(&trajs));
         self.optim.zero_grad();
         expected_reward.backward();
         self.optim.step();

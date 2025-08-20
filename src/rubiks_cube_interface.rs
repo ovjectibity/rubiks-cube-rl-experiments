@@ -3,25 +3,38 @@ use crate::rubiks::RubiksCube;
 use crate::rubiks::CubeMove;
 use crate::rubiks_solver::Trajectory;
 use rand::Rng;
+use log::{info};
 
 pub struct RubiksCubeModelInterface {
     rubiks_cube: RubiksCube,
     solver: RubiksSolver,
     num_trajectories: u32,
-    trajectory_depth: u32
+    trajectory_depth: u32,
+    num_layers: u32,
+    hidden_layer_dimension: u32,
+    num_epochs: u32,
+    learning_rate: f64
 }
 
 impl RubiksCubeModelInterface {
     pub fn new() -> Self {
-        let num_trajectories = 200;
+        let num_trajectories = 400;
         let trajectory_depth = 2;
+        let num_layers: u32 = 4;
+        let hidden_layer_dimension: u32 = 2500;
+        let num_epochs: u32 = 3;
+        let learning_rate: f64 = 1e-4;
         RubiksCubeModelInterface {
             rubiks_cube: RubiksCube::new(),
-            solver: RubiksSolver::new(4,2500,
-                50,num_trajectories,trajectory_depth,
-            1e-4),
+            solver: RubiksSolver::new(num_layers,hidden_layer_dimension,
+                num_epochs,num_trajectories,trajectory_depth,
+                learning_rate),
             num_trajectories: num_trajectories,
-            trajectory_depth: trajectory_depth
+            trajectory_depth: trajectory_depth,
+            num_layers: num_layers,
+            hidden_layer_dimension: hidden_layer_dimension,
+            num_epochs: num_epochs,
+            learning_rate: learning_rate
         }
     }
 
@@ -106,37 +119,45 @@ impl RubiksCubeModelInterface {
         let r_cubes_moves: (Vec<RubiksCube>, Vec<Vec<CubeMove>>) = 
             Self::randomly_scramble_cube(&mut self.rubiks_cube, 
                 10,self.trajectory_depth,false);
-            println!("The random scrambling applied these moves: {:?} for testing",
+            info!("The random scrambling applied these moves: {:?} for testing",
                 r_cubes_moves.1);
 
-        println!("Running the test loop now: ");
+        info!("Running the test loop now: ");
         for i in 0..10 {
             let mut r_cube = r_cubes_moves.0.get(i).expect("Expected cube").clone();
             let r_move = r_cubes_moves.1.get(i).expect("Expected move");
-            println!("Scrambled cube used for test {:?} used this moves: {:?}",i,r_move);
+            info!("Scrambled cube used for test {:?} used this moves: {:?}",i,r_move);
 
             for j in 0..self.trajectory_depth {
                 let mv = self.solver.generate_move(&r_cube);
                 r_cube = r_cube.apply_move(mv.clone());
-                println!("Got the cubemove from policy: {:?} for turn {:?}",mv,j);
+                info!("Got the cubemove from policy: {:?} for turn {:?}",mv,j);
 
                 let logits = self.solver.generate_move_logits(&r_cube);
                 let policy_entropy = - (&logits.log() * &logits).
-                sum_dim_intlist(1,false,tch::Kind::Float);
-                println!("The cross entropy for turn {:?} {:?}",j,policy_entropy.size());
-                policy_entropy.print();
-                println!("Printing logits: {:?}",logits.size());
-                logits.print();
-                println!("Sum of logits: {:?}",logits.sum(tch::Kind::Float));
+                        sum_dim_intlist(1,false,tch::Kind::Float);
+                info!("The cross entropy for turn {:?} {:?} {:?}",
+                        j,policy_entropy.size(),
+                        policy_entropy.to_device(tch::Device::Cpu));
+                //Calculate test reward here: 
+                // info!("Printing logits: {:?} {:?}",logits.size(),logits.to_device(tch::Device::Cpu));
+                // info!("Sum of logits: {:?}",logits.sum(tch::Kind::Float));
             }
         }
     } 
 
     pub fn train_policy(&mut self) {
-        println!("Initializing policy training...");
+        info!("Using the following hyperparameters:");
+        info!("Hidden layer dimensions: {:?}",self.hidden_layer_dimension);
+        info!("Number of layers: {:?}",self.num_layers);
+        info!("Number of trajectories: {:?}",self.num_trajectories);
+        info!("Trajectory depth: {:?}",self.trajectory_depth);
+        info!("Number of epochs: {:?}",self.num_epochs);
+        info!("Learning rate: {:?}",self.learning_rate);
+        info!("Starting policy training...");
 
         for i in 0..self.solver.num_epochs {
-            println!("Training {} epoch",i);
+            info!("Training epoch {}",i);
             //Start with a different starting point for each epoch: 
             let r_cubes_moves = 
                 Self::randomly_scramble_cube(

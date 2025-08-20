@@ -1,0 +1,105 @@
+15:40:26 [INFO] Is MPS available: true
+15:40:26 [INFO] Using the following hyperparameters:
+15:40:26 [INFO] Hidden layer dimensions: 2500
+15:40:26 [INFO] Number of layers: 4
+15:40:26 [INFO] Number of trajectories: 400
+15:40:26 [INFO] Trajectory depth: 2
+15:40:26 [INFO] Number of epochs: 3
+15:40:26 [INFO] Learning rate: 0.0001
+15:40:26 [INFO] Starting policy training...
+15:40:26 [INFO] Training epoch 0
+15:40:27 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+15:40:27 [INFO] Size of sampled logits tensor [400, 2, 1]
+15:40:27 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+15:40:27 [INFO] Unweighted rewards: [400, 2]
+15:40:27 [INFO] Weighted rewards: [400]
+15:40:27 [INFO] Loss tensor: [1] [-220130.4375]
+15:40:27 [INFO] Mean epoch policy entropy for the trajectories is: 2.5583699
+15:40:30 [INFO] Training epoch 1
+15:40:32 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+15:40:32 [INFO] Size of sampled logits tensor [400, 2, 1]
+15:40:32 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+15:40:32 [INFO] Unweighted rewards: [400, 2]
+15:40:32 [INFO] Weighted rewards: [400]
+15:40:32 [INFO] Loss tensor: [1] [-179129.15625]
+15:40:32 [INFO] Mean epoch policy entropy for the trajectories is: 2.5545201
+15:40:35 [INFO] Training epoch 2
+15:40:36 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+15:40:36 [INFO] Size of sampled logits tensor [400, 2, 1]
+15:40:36 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+15:40:36 [INFO] Unweighted rewards: [400, 2]
+15:40:36 [INFO] Weighted rewards: [400]
+15:40:36 [INFO] Loss tensor: [1] [-79729.875]
+15:40:36 [INFO] Mean epoch policy entropy for the trajectories is: 2.550761
+15:40:39 [INFO] The random scrambling applied these moves: [[DPlus, DPlus], [FPlus, BMinus], [DPlus, RPlus], [RMinus, LPlus], [LMinus, UMinus], [LMinus, DMinus], [FMinus, FPlus], [FMinus, BMinus], [RPlus, LPlus], [DPlus, BMinus]] for testing
+15:40:39 [INFO] Running the test loop now: 
+15:40:39 [INFO] Scrambled cube used for test 0 used this moves: [DPlus, DPlus]
+15:40:39 [INFO] Got the cubemove from policy: FMinus for turn 0
+15:40:39 [INFO] The cross entropy for turn 0 [1] [2.5464119911193848]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Got the cubemove from policy: LPlus for turn 1
+15:40:39 [INFO] The cross entropy for turn 1 [1] [2.5495479106903076]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Scrambled cube used for test 1 used this moves: [FPlus, BMinus]
+15:40:39 [INFO] Got the cubemove from policy: LMinus for turn 0
+15:40:39 [INFO] The cross entropy for turn 0 [1] [2.5540425777435303]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Got the cubemove from policy: DMinus for turn 1
+15:40:39 [INFO] The cross entropy for turn 1 [1] [2.5549750328063965]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Scrambled cube used for test 2 used this moves: [DPlus, RPlus]
+15:40:39 [INFO] Got the cubemove from policy: DMinus for turn 0
+15:40:39 [INFO] The cross entropy for turn 0 [1] [2.5597903728485107]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Got the cubemove from policy: LMinus for turn 1
+15:40:39 [INFO] The cross entropy for turn 1 [1] [2.559061050415039]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Scrambled cube used for test 3 used this moves: [RMinus, LPlus]
+15:40:39 [INFO] Got the cubemove from policy: UPlus for turn 0
+15:40:39 [INFO] The cross entropy for turn 0 [1] [2.5584211349487305]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Got the cubemove from policy: DPlus for turn 1
+15:40:39 [INFO] The cross entropy for turn 1 [1] [2.556751251220703]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Scrambled cube used for test 4 used this moves: [LMinus, UMinus]
+15:40:39 [INFO] Got the cubemove from policy: LMinus for turn 0
+15:40:39 [INFO] The cross entropy for turn 0 [1] [2.5435633659362793]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Got the cubemove from policy: DMinus for turn 1
+15:40:39 [INFO] The cross entropy for turn 1 [1] [2.5054218769073486]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Scrambled cube used for test 5 used this moves: [LMinus, DMinus]
+15:40:39 [INFO] Got the cubemove from policy: FPlus for turn 0
+15:40:39 [INFO] The cross entropy for turn 0 [1] [2.522812843322754]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Got the cubemove from policy: UMinus for turn 1
+15:40:39 [INFO] The cross entropy for turn 1 [1] [2.523449182510376]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Scrambled cube used for test 6 used this moves: [FMinus, FPlus]
+15:40:39 [INFO] Got the cubemove from policy: LMinus for turn 0
+15:40:39 [INFO] The cross entropy for turn 0 [1] [2.5466320514678955]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Got the cubemove from policy: FPlus for turn 1
+15:40:39 [INFO] The cross entropy for turn 1 [1] [2.5526700019836426]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Scrambled cube used for test 7 used this moves: [FMinus, BMinus]
+15:40:39 [INFO] Got the cubemove from policy: RMinus for turn 0
+15:40:39 [INFO] The cross entropy for turn 0 [1] [2.5511093139648438]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Got the cubemove from policy: UPlus for turn 1
+15:40:39 [INFO] The cross entropy for turn 1 [1] [2.554910659790039]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Scrambled cube used for test 8 used this moves: [RPlus, LPlus]
+15:40:39 [INFO] Got the cubemove from policy: DPlus for turn 0
+15:40:39 [INFO] The cross entropy for turn 0 [1] [2.559539794921875]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Got the cubemove from policy: UPlus for turn 1
+15:40:39 [INFO] The cross entropy for turn 1 [1] [2.5577306747436523]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Scrambled cube used for test 9 used this moves: [DPlus, BMinus]
+15:40:39 [INFO] Got the cubemove from policy: BPlus for turn 0
+15:40:39 [INFO] The cross entropy for turn 0 [1] [2.5479984283447266]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
+15:40:39 [INFO] Got the cubemove from policy: LMinus for turn 1
+15:40:39 [INFO] The cross entropy for turn 1 [1] [2.5563459396362305]
+15:40:39 [INFO] Printing logits: [1, 13] Tensor[[1, 13], Float]
