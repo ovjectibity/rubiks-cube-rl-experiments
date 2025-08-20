@@ -17,8 +17,8 @@ impl RubiksCubeModelInterface {
         let trajectory_depth = 2;
         RubiksCubeModelInterface {
             rubiks_cube: RubiksCube::new(),
-            solver: RubiksSolver::new(5,1500,
-                100,num_trajectories,trajectory_depth,
+            solver: RubiksSolver::new(4,2500,
+                50,num_trajectories,trajectory_depth,
             1e-4),
             num_trajectories: num_trajectories,
             trajectory_depth: trajectory_depth
