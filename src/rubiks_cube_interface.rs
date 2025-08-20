@@ -13,7 +13,8 @@ pub struct RubiksCubeModelInterface {
     num_layers: u32,
     hidden_layer_dimension: u32,
     num_epochs: u32,
-    learning_rate: f64
+    learning_rate: f64,
+    num_tests: u32
 }
 
 impl RubiksCubeModelInterface {
@@ -34,7 +35,8 @@ impl RubiksCubeModelInterface {
             num_layers: num_layers,
             hidden_layer_dimension: hidden_layer_dimension,
             num_epochs: num_epochs,
-            learning_rate: learning_rate
+            learning_rate: learning_rate,
+            num_tests: 10
         }
     }
 
@@ -123,23 +125,24 @@ impl RubiksCubeModelInterface {
                 r_cubes_moves.1);
 
         info!("Running the test loop now: ");
-        for i in 0..10 {
-            let mut r_cube = r_cubes_moves.0.get(i).expect("Expected cube").clone();
+        for i in 0..self.num_tests as usize {
+            let mut r_cube = 
+                r_cubes_moves.0.get(i).expect("Expected cube").clone();
             let r_move = r_cubes_moves.1.get(i).expect("Expected move");
             info!("Scrambled cube used for test {:?} used this moves: {:?}",i,r_move);
 
             for j in 0..self.trajectory_depth {
-                let mv = self.solver.generate_move(&r_cube);
+                let logits = self.solver.generate_move_logits(&r_cube);
+                let mv = RubiksSolver::sample_action(&logits);
                 r_cube = r_cube.apply_move(mv.clone());
                 info!("Got the cubemove from policy: {:?} for turn {:?}",mv,j);
 
-                let logits = self.solver.generate_move_logits(&r_cube);
                 let policy_entropy = - (&logits.log() * &logits).
                         sum_dim_intlist(1,false,tch::Kind::Float);
+                //Calculate test reward here, calculate mean entropy of test moves: 
                 info!("The cross entropy for turn {:?} {:?} {:?}",
                         j,policy_entropy.size(),
                         policy_entropy.to_device(tch::Device::Cpu));
-                //Calculate test reward here: 
                 // info!("Printing logits: {:?} {:?}",logits.size(),logits.to_device(tch::Device::Cpu));
                 // info!("Sum of logits: {:?}",logits.sum(tch::Kind::Float));
             }

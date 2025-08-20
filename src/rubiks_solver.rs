@@ -169,7 +169,7 @@ impl RubiksSolver {
         new_score - old_score
     }
 
-    fn sample_action(probs: &Tensor) -> CubeMove {
+    pub fn sample_action(probs: &Tensor) -> CubeMove {
         assert!(probs.dim() == 2);
         // println!("Sampling action from probs: {:?}",probs.size());
         let index = Self::sample_categorical(&Vec::<f32>::try_from(probs.squeeze()).unwrap());
