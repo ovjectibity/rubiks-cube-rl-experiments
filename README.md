@@ -1,6 +1,6 @@
 ## The Plan
 
-Inspired by OpenAI's [2018 paper](https://arxiv.org/abs/1910.07113) on solving the Rubik's Cube with a robot hand, I'm trying to solve the standard 3x3x3 Rubik's in 4 grades of difficulty using deep RL: 
+Inspired by OpenAI's [2019 paper](https://arxiv.org/abs/1910.07113) on solving the Rubik's Cube with a robot hand, I'm trying to solve the standard 3x3x3 Rubik's in 4 grades of difficulty using deep RL: 
 1. Grade-1: Purely representational I/O
 2. Grade-2: Representiational input + Assisted articulation
 3. Grade-3: Representational input + Embodied articulation

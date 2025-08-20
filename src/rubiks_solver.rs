@@ -373,23 +373,22 @@ impl RubiksSolver {
     }
 
     pub fn gen_input_representation(cube: &RubiksCube) -> tch::Tensor {
-        let mut t = tch::Tensor::empty(&[0,1],(tch::Kind::Float,tch::Device::Mps));
+        let mut t = tch::Tensor::empty(&[0,1],(tch::Kind::Float,tch::Device::Cpu));
         let cube_slot_map = cube.cube_slot_map.borrow();
         let face_strings = Self::get_face_strings();
         for face_string in face_strings {
             let s = cube_slot_map.get(&face_string).expect("Expected cube slot to be available");
             let sc_t_o = Self::get_cubelet_representation(s, &cube.cubelets);
             if let Some(sc_t) = sc_t_o {
-                let mps_sc_t = sc_t.to_device(tch::Device::Mps);
                 // println!("Got cubelet {:?} {:?}",sc_t.dim(),sc_t);
-                t = tch::Tensor::cat(&[t,mps_sc_t.unsqueeze(1)],0);
+                t = tch::Tensor::cat(&[t,sc_t.unsqueeze(1)],0);
                 // println!("Got cubelet {:?} {:?}",t.dim(),t);
             } else {
                 println!("Warning; couldn't get cubelet representation. That wasn't supposed to happen.");
             }
         }
         // println!("Returning input tensor {:?}",t);
-        t
+        t.to_device(tch::Device::Mps)
     }
 
     //The generated tuple is (a,s,p_a,r_s)
@@ -418,6 +417,19 @@ impl RubiksSolver {
             trajectory_rewards,
             trajectory_logits.size());
         Trajectory::new(trajectory_moves,trajectory_logits,trajectory_rewards)
+    }
+
+    pub fn gen_trajectories(&self,cube_start: Vec<RubiksCube>) -> 
+        Vec<Trajectory> {
+        let mut trajs = Vec::new();
+        for i in 0..self.num_trajectories {
+            //TODO: Can we avoid this clone?
+            let traj = self.gen_trajectory(cube_start.get(i as usize).
+                expect("Expected start cube at position").clone());
+            // println!("Generated the trajectory:{:?}",traj.0);
+            trajs.push(traj);
+        }
+        trajs
     }
 
     //Shape of the logits: [num_trajectory, trajectory_depth, num_moves]
@@ -453,19 +465,6 @@ impl RubiksSolver {
         println!("Weighted rewards: {:?}",weighted_rewards.size());
         // weighted_rewards.print();
         - weighted_rewards.mean_dim(0,true,tch::Kind::Float)
-    }
-
-    pub fn gen_trajectories(&self,cube_start: Vec<RubiksCube>) -> 
-        Vec<Trajectory> {
-        let mut trajs = Vec::new();
-        for i in 0..self.num_trajectories {
-            //TODO: Can we avoid this clone?
-            let traj = self.gen_trajectory(cube_start.get(i as usize).
-                expect("Expected start cube at position").clone());
-            // println!("Generated the trajectory:{:?}",traj.0);
-            trajs.push(traj);
-        }
-        trajs
     }
 
     //Running the training simulation involves for an epoc
