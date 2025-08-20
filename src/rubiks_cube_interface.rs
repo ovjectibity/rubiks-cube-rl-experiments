@@ -15,8 +15,8 @@ impl RubiksCubeModelInterface {
         let num_trajectories = 400;
         RubiksCubeModelInterface {
             rubiks_cube: RubiksCube::new(),
-            solver: RubiksSolver::new(4,2000,
-                50,num_trajectories,1,
+            solver: RubiksSolver::new(5,1500,
+                100,num_trajectories,1,
             1e-4),
             num_trajectories: num_trajectories
         }
@@ -38,7 +38,16 @@ impl RubiksCubeModelInterface {
         for i in 0..turns {
             fixed_moves.push(
                 Self::random_sample_move()
-                // CubeMove::BPlus
+                // CubeMove::FPlus
+                // CubeMove::FMinus
+                // CubeMove::UPlus
+                // CubeMove::UMinus
+                // CubeMove::DMinus
+                // CubeMove::DPlus
+                // CubeMove::LMinus
+                // CubeMove::LPlus
+                // CubeMove::RMinus
+                // CubeMove::RPlus
             );
         }
 
@@ -115,7 +124,8 @@ impl RubiksCubeModelInterface {
             // let rcb2 = self.rubiks_cube.apply_move(mv.clone());
             println!("Got the cubemove from policy: {:?} {:?} {:?} {:?}",mv[0],mv[1],mv[2],mv[3]);
             let logits = self.solver.generate_move_logits(r_cube);
-            let policy_entropy = - (&logits.log() * &logits).sum_dim_intlist(1,false,tch::Kind::Float);
+            let policy_entropy = - (&logits.log() * &logits).
+                sum_dim_intlist(1,false,tch::Kind::Float);
             println!("The cross entropy for test cycle {:?} {:?}",i,policy_entropy.size());
             policy_entropy.print();
             println!("Printing logits: {:?}",logits.size());

@@ -66,7 +66,7 @@ impl RubiksSolver {
     fn init_policy(hidden_layer_dimension: i64,num_layers: i64) -> (nn::Sequential,nn::VarStore) {
         let vs = nn::VarStore::new(tch::Device::Cpu);
         let vs_p = vs.root();
-        let mut y = nn::seq().add(nn::linear(vs_p.clone(), 54, hidden_layer_dimension, Default::default())).
+        let mut y = nn::seq().add(nn::linear(vs_p.clone(), 324, hidden_layer_dimension, Default::default())).
             add_fn(Tensor::relu);
         for i in 0..num_layers-2 {
             y = y.add(nn::linear(vs_p.clone(),hidden_layer_dimension,hidden_layer_dimension,Default::default())).
@@ -210,25 +210,25 @@ impl RubiksSolver {
         }
     }
 
-    fn get_color_representation(color: &FaceColor) -> f32 {
+    fn get_color_representation(color: &FaceColor) -> Vec<f32> {
         match color {
             FaceColor::Red => {
-                1.0
+                vec!(1.0,0.0,0.0,0.0,0.0,0.0)
             },
             FaceColor::Blue => {
-                2.0
+                vec!(0.0,1.0,0.0,0.0,0.0,0.0)
             },
             FaceColor::Green => {
-                3.0
+                vec!(0.0,0.0,1.0,0.0,0.0,0.0)
             }, 
             FaceColor::White => {
-                4.0
+                vec!(0.0,0.0,0.0,1.0,0.0,0.0)
             },
             FaceColor::Yellow => {
-                5.0
+                vec!(0.0,0.0,0.0,0.0,1.0,0.0)
             },
             FaceColor::Orange => {
-                6.0
+                vec!(0.0,0.0,0.0,0.0,0.0,1.0)
             }
         }
     }
@@ -243,7 +243,7 @@ impl RubiksSolver {
                 match cubelet {
                     Cubelet::Center(i) => {
                         // tch::Tensor::empty(&[1,1],(tch::Kind::Float,tch::Device::Cpu));
-                        Some(tch::Tensor::from_slice(&[Self::get_color_representation(i)]))
+                        Some(tch::Tensor::from_slice(&Self::get_color_representation(i)))
                     },
                     _ => panic!("Expected corner cubelet")
                 }
@@ -255,9 +255,10 @@ impl RubiksSolver {
                     Cubelet::Corner(i,j,k) => {
                         let face_colors = 
                             Self::get_face_colors_corner((i,j,k), color_indices);
-                        Some(tch::Tensor::from_slice(&[Self::get_color_representation(face_colors.0),
-                                                    Self::get_color_representation(face_colors.1),
-                                                    Self::get_color_representation(face_colors.2)]))
+                        let mut color_reps = Self::get_color_representation(face_colors.0);
+                        color_reps.append(&mut Self::get_color_representation(face_colors.1));
+                        color_reps.append(&mut Self::get_color_representation(face_colors.2));
+                        Some(tch::Tensor::from_slice(&color_reps))
                     },
                     _ => panic!("Expected corner cubelet")
                 }
@@ -269,8 +270,9 @@ impl RubiksSolver {
                     Cubelet::Edge(i,j) => {
                         let face_colors = 
                             Self::get_face_colors_edge((i,j), color_indices);
-                        Some(tch::Tensor::from_slice(&[Self::get_color_representation(face_colors.0),
-                                                    Self::get_color_representation(face_colors.1)]))
+                        let mut color_reps = Self::get_color_representation(face_colors.0);
+                        color_reps.append(&mut Self::get_color_representation(face_colors.1));
+                        Some(tch::Tensor::from_slice(&color_reps))
                     },
                     _ => panic!("Expected corner cubelet")
                 }
