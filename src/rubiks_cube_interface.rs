@@ -21,9 +21,9 @@ impl RubiksCubeModelInterface {
     pub fn new() -> Self {
         let num_trajectories = 400;
         let trajectory_depth = 2;
-        let num_layers: u32 = 4;
-        let hidden_layer_dimension: u32 = 2500;
-        let num_epochs: u32 = 3;
+        let num_layers: u32 = 5;
+        let hidden_layer_dimension: u32 = 2000;
+        let num_epochs: u32 = 50;
         let learning_rate: f64 = 1e-4;
         RubiksCubeModelInterface {
             rubiks_cube: RubiksCube::new(),
@@ -123,8 +123,12 @@ impl RubiksCubeModelInterface {
                 10,self.trajectory_depth,false);
             info!("The random scrambling applied these moves: {:?} for testing",
                 r_cubes_moves.1);
+        let mut mean_loss: f32 = 0.0;
+        let mut mean_entropy: f32 = 0.0;
+        let mut num_correct_moves: u32 = 0;
 
         info!("Running the test loop now: ");
+        info!("Number of tests: {:?}",self.num_tests);
         for i in 0..self.num_tests as usize {
             let mut r_cube = 
                 r_cubes_moves.0.get(i).expect("Expected cube").clone();
@@ -134,19 +138,35 @@ impl RubiksCubeModelInterface {
             for j in 0..self.trajectory_depth {
                 let logits = self.solver.generate_move_logits(&r_cube);
                 let mv = RubiksSolver::sample_action(&logits);
+                let mvc = 
+                    r_move.get((self.trajectory_depth - j - 1) as usize).expect("Expected move to be available");
                 r_cube = r_cube.apply_move(mv.clone());
+                let compl = CubeMove::are_cube_moves_complementary(&mv,&mvc);
                 info!("Got the cubemove from policy: {:?} for turn {:?}",mv,j);
+                info!("The above is complementary or not: {:?}",compl);
+                num_correct_moves += if compl {
+                    1
+                } else {
+                    0
+                };
 
                 let policy_entropy = - (&logits.log() * &logits).
-                        sum_dim_intlist(1,false,tch::Kind::Float);
+                        sum_dim_intlist(1,false,tch::Kind::Float).
+                        to_device(tch::Device::Cpu);
+                let policy_entropy_f: f32 = policy_entropy.try_into().
+                    expect("Failed to get entropy off the tensor");
+                mean_entropy += policy_entropy_f;
                 //Calculate test reward here, calculate mean entropy of test moves: 
-                info!("The cross entropy for turn {:?} {:?} {:?}",
-                        j,policy_entropy.size(),
-                        policy_entropy.to_device(tch::Device::Cpu));
+                info!("The cross entropy for turn {:?} {:?}",
+                        j,
+                        policy_entropy_f);
                 // info!("Printing logits: {:?} {:?}",logits.size(),logits.to_device(tch::Device::Cpu));
                 // info!("Sum of logits: {:?}",logits.sum(tch::Kind::Float));
             }
         }
+        info!("Mean loss for tests {:?}",mean_loss / (self.num_tests as f32));
+        info!("Mean entropy for tests {:?}",mean_entropy / ((self.num_tests * self.trajectory_depth) as f32));
+        info!("Mean correct moves for {:?}",num_correct_moves as f32 / self.num_tests as f32);
     } 
 
     pub fn train_policy(&mut self) {

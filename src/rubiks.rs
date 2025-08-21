@@ -28,6 +28,20 @@ pub enum CubeMove {
     NoOp
 }
 
+impl CubeMove {
+    pub fn are_cube_moves_complementary(mv1: &Self,mv2: &Self) -> bool {
+        match (mv1,mv2) {
+            (CubeMove::LPlus,CubeMove::LMinus) | (CubeMove::LMinus,CubeMove::LPlus) => true,
+            (CubeMove::RPlus,CubeMove::RMinus) | (CubeMove::RMinus,CubeMove::RPlus) => true,
+            (CubeMove::UPlus,CubeMove::UMinus) | (CubeMove::UMinus,CubeMove::UPlus) => true,
+            (CubeMove::DPlus,CubeMove::DMinus) | (CubeMove::DMinus,CubeMove::DPlus) => true,
+            (CubeMove::FPlus,CubeMove::FMinus) | (CubeMove::FMinus,CubeMove::FPlus) => true,
+            (CubeMove::BPlus,CubeMove::BMinus) | (CubeMove::BMinus,CubeMove::BPlus) => true,
+            (_,_) => false
+        }
+    }
+}
+
 #[derive(Clone,Debug)]
 pub enum Cubelet {
     Center(FaceColor),

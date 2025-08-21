@@ -1,0 +1,485 @@
+14:40:06 [INFO] Is MPS available: true
+14:40:06 [INFO] Using the following hyperparameters:
+14:40:06 [INFO] Hidden layer dimensions: 3000
+14:40:06 [INFO] Number of layers: 4
+14:40:06 [INFO] Number of trajectories: 400
+14:40:06 [INFO] Trajectory depth: 2
+14:40:06 [INFO] Number of epochs: 50
+14:40:06 [INFO] Learning rate: 0.0001
+14:40:06 [INFO] Starting policy training...
+14:40:06 [INFO] Training epoch 0
+14:40:08 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:40:08 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:40:08 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:40:08 [INFO] Unweighted rewards: [400, 2]
+14:40:08 [INFO] Weighted rewards: [400]
+14:40:08 [INFO] Loss tensor: [1] [-150881.28125]
+14:40:08 [INFO] Mean epoch policy entropy for the trajectories is: 2.5589678
+14:40:12 [INFO] Training epoch 1
+14:40:14 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:40:14 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:40:14 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:40:14 [INFO] Unweighted rewards: [400, 2]
+14:40:14 [INFO] Weighted rewards: [400]
+14:40:14 [INFO] Loss tensor: [1] [-133985.6875]
+14:40:14 [INFO] Mean epoch policy entropy for the trajectories is: 2.541375
+14:40:18 [INFO] Training epoch 2
+14:40:20 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:40:20 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:40:20 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:40:20 [INFO] Unweighted rewards: [400, 2]
+14:40:20 [INFO] Weighted rewards: [400]
+14:40:20 [INFO] Loss tensor: [1] [-104813.6796875]
+14:40:20 [INFO] Mean epoch policy entropy for the trajectories is: 2.4867537
+14:40:24 [INFO] Training epoch 3
+14:40:26 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:40:26 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:40:26 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:40:26 [INFO] Unweighted rewards: [400, 2]
+14:40:26 [INFO] Weighted rewards: [400]
+14:40:26 [INFO] Loss tensor: [1] [-201898.234375]
+14:40:26 [INFO] Mean epoch policy entropy for the trajectories is: 2.4396863
+14:40:30 [INFO] Training epoch 4
+14:40:32 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:40:32 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:40:32 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:40:32 [INFO] Unweighted rewards: [400, 2]
+14:40:32 [INFO] Weighted rewards: [400]
+14:40:32 [INFO] Loss tensor: [1] [-45976.52734375]
+14:40:32 [INFO] Mean epoch policy entropy for the trajectories is: 2.3915417
+14:40:36 [INFO] Training epoch 5
+14:40:37 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:40:37 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:40:37 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:40:37 [INFO] Unweighted rewards: [400, 2]
+14:40:37 [INFO] Weighted rewards: [400]
+14:40:37 [INFO] Loss tensor: [1] [-33789.90234375]
+14:40:38 [INFO] Mean epoch policy entropy for the trajectories is: 2.2752979
+14:40:42 [INFO] Training epoch 6
+14:40:43 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:40:43 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:40:43 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:40:43 [INFO] Unweighted rewards: [400, 2]
+14:40:43 [INFO] Weighted rewards: [400]
+14:40:43 [INFO] Loss tensor: [1] [-109695.296875]
+14:40:43 [INFO] Mean epoch policy entropy for the trajectories is: 2.283027
+14:40:48 [INFO] Training epoch 7
+14:40:49 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:40:49 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:40:49 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:40:49 [INFO] Unweighted rewards: [400, 2]
+14:40:49 [INFO] Weighted rewards: [400]
+14:40:49 [INFO] Loss tensor: [1] [2586.550048828125]
+14:40:49 [INFO] Mean epoch policy entropy for the trajectories is: 2.226676
+14:40:54 [INFO] Training epoch 8
+14:40:55 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:40:55 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:40:55 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:40:55 [INFO] Unweighted rewards: [400, 2]
+14:40:55 [INFO] Weighted rewards: [400]
+14:40:55 [INFO] Loss tensor: [1] [105808.234375]
+14:40:56 [INFO] Mean epoch policy entropy for the trajectories is: 2.1309423
+14:41:00 [INFO] Training epoch 9
+14:41:01 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:41:01 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:41:01 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:41:01 [INFO] Unweighted rewards: [400, 2]
+14:41:01 [INFO] Weighted rewards: [400]
+14:41:01 [INFO] Loss tensor: [1] [74113.625]
+14:41:01 [INFO] Mean epoch policy entropy for the trajectories is: 2.0395682
+14:41:06 [INFO] Training epoch 10
+14:41:07 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:41:07 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:41:07 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:41:07 [INFO] Unweighted rewards: [400, 2]
+14:41:07 [INFO] Weighted rewards: [400]
+14:41:07 [INFO] Loss tensor: [1] [122039.4765625]
+14:41:07 [INFO] Mean epoch policy entropy for the trajectories is: 1.9769797
+14:41:12 [INFO] Training epoch 11
+14:41:13 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:41:13 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:41:13 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:41:13 [INFO] Unweighted rewards: [400, 2]
+14:41:13 [INFO] Weighted rewards: [400]
+14:41:13 [INFO] Loss tensor: [1] [48504.71875]
+14:41:13 [INFO] Mean epoch policy entropy for the trajectories is: 1.9090457
+14:41:18 [INFO] Training epoch 12
+14:41:19 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:41:19 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:41:19 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:41:19 [INFO] Unweighted rewards: [400, 2]
+14:41:19 [INFO] Weighted rewards: [400]
+14:41:19 [INFO] Loss tensor: [1] [36417.125]
+14:41:19 [INFO] Mean epoch policy entropy for the trajectories is: 1.7826226
+14:41:24 [INFO] Training epoch 13
+14:41:25 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:41:25 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:41:25 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:41:25 [INFO] Unweighted rewards: [400, 2]
+14:41:25 [INFO] Weighted rewards: [400]
+14:41:25 [INFO] Loss tensor: [1] [109544.4765625]
+14:41:25 [INFO] Mean epoch policy entropy for the trajectories is: 1.5612315
+14:41:30 [INFO] Training epoch 14
+14:41:31 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:41:31 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:41:31 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:41:31 [INFO] Unweighted rewards: [400, 2]
+14:41:31 [INFO] Weighted rewards: [400]
+14:41:31 [INFO] Loss tensor: [1] [46501.76953125]
+14:41:31 [INFO] Mean epoch policy entropy for the trajectories is: 1.4947958
+14:41:36 [INFO] Training epoch 15
+14:41:37 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:41:37 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:41:37 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:41:37 [INFO] Unweighted rewards: [400, 2]
+14:41:37 [INFO] Weighted rewards: [400]
+14:41:37 [INFO] Loss tensor: [1] [80020.3359375]
+14:41:37 [INFO] Mean epoch policy entropy for the trajectories is: 1.3870537
+14:41:42 [INFO] Training epoch 16
+14:41:43 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:41:43 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:41:43 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:41:43 [INFO] Unweighted rewards: [400, 2]
+14:41:43 [INFO] Weighted rewards: [400]
+14:41:43 [INFO] Loss tensor: [1] [87560.8359375]
+14:41:43 [INFO] Mean epoch policy entropy for the trajectories is: 1.2251625
+14:41:47 [INFO] Training epoch 17
+14:41:49 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:41:49 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:41:49 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:41:49 [INFO] Unweighted rewards: [400, 2]
+14:41:49 [INFO] Weighted rewards: [400]
+14:41:49 [INFO] Loss tensor: [1] [55147.34765625]
+14:41:49 [INFO] Mean epoch policy entropy for the trajectories is: 1.1675035
+14:41:53 [INFO] Training epoch 18
+14:41:55 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:41:55 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:41:55 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:41:55 [INFO] Unweighted rewards: [400, 2]
+14:41:55 [INFO] Weighted rewards: [400]
+14:41:55 [INFO] Loss tensor: [1] [41183.2109375]
+14:41:55 [INFO] Mean epoch policy entropy for the trajectories is: 1.01836
+14:41:59 [INFO] Training epoch 19
+14:42:01 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:42:01 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:42:01 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:42:01 [INFO] Unweighted rewards: [400, 2]
+14:42:01 [INFO] Weighted rewards: [400]
+14:42:01 [INFO] Loss tensor: [1] [20423.5390625]
+14:42:01 [INFO] Mean epoch policy entropy for the trajectories is: 0.9700055
+14:42:05 [INFO] Training epoch 20
+14:42:07 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:42:07 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:42:07 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:42:07 [INFO] Unweighted rewards: [400, 2]
+14:42:07 [INFO] Weighted rewards: [400]
+14:42:07 [INFO] Loss tensor: [1] [57153.30859375]
+14:42:07 [INFO] Mean epoch policy entropy for the trajectories is: 0.8940547
+14:42:11 [INFO] Training epoch 21
+14:42:13 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:42:13 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:42:13 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:42:13 [INFO] Unweighted rewards: [400, 2]
+14:42:13 [INFO] Weighted rewards: [400]
+14:42:13 [INFO] Loss tensor: [1] [28967.673828125]
+14:42:13 [INFO] Mean epoch policy entropy for the trajectories is: 0.80971754
+14:42:17 [INFO] Training epoch 22
+14:42:19 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:42:19 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:42:19 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:42:19 [INFO] Unweighted rewards: [400, 2]
+14:42:19 [INFO] Weighted rewards: [400]
+14:42:19 [INFO] Loss tensor: [1] [34269.93359375]
+14:42:19 [INFO] Mean epoch policy entropy for the trajectories is: 0.7434447
+14:42:23 [INFO] Training epoch 23
+14:42:25 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:42:25 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:42:25 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:42:25 [INFO] Unweighted rewards: [400, 2]
+14:42:25 [INFO] Weighted rewards: [400]
+14:42:25 [INFO] Loss tensor: [1] [24999.962890625]
+14:42:25 [INFO] Mean epoch policy entropy for the trajectories is: 0.7348854
+14:42:29 [INFO] Training epoch 24
+14:42:31 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:42:31 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:42:31 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:42:31 [INFO] Unweighted rewards: [400, 2]
+14:42:31 [INFO] Weighted rewards: [400]
+14:42:31 [INFO] Loss tensor: [1] [41414.078125]
+14:42:31 [INFO] Mean epoch policy entropy for the trajectories is: 0.7263723
+14:42:35 [INFO] Training epoch 25
+14:42:37 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:42:37 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:42:37 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:42:37 [INFO] Unweighted rewards: [400, 2]
+14:42:37 [INFO] Weighted rewards: [400]
+14:42:37 [INFO] Loss tensor: [1] [32328.544921875]
+14:42:37 [INFO] Mean epoch policy entropy for the trajectories is: 0.65954477
+14:42:41 [INFO] Training epoch 26
+14:42:43 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:42:43 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:42:43 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:42:43 [INFO] Unweighted rewards: [400, 2]
+14:42:43 [INFO] Weighted rewards: [400]
+14:42:43 [INFO] Loss tensor: [1] [28532.109375]
+14:42:43 [INFO] Mean epoch policy entropy for the trajectories is: 0.64265424
+14:42:47 [INFO] Training epoch 27
+14:42:49 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:42:49 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:42:49 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:42:49 [INFO] Unweighted rewards: [400, 2]
+14:42:49 [INFO] Weighted rewards: [400]
+14:42:49 [INFO] Loss tensor: [1] [12878.7119140625]
+14:42:49 [INFO] Mean epoch policy entropy for the trajectories is: 0.5916277
+14:42:53 [INFO] Training epoch 28
+14:42:55 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:42:55 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:42:55 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:42:55 [INFO] Unweighted rewards: [400, 2]
+14:42:55 [INFO] Weighted rewards: [400]
+14:42:55 [INFO] Loss tensor: [1] [17928.9453125]
+14:42:55 [INFO] Mean epoch policy entropy for the trajectories is: 0.60770506
+14:42:59 [INFO] Training epoch 29
+14:43:00 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:43:00 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:43:00 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:43:00 [INFO] Unweighted rewards: [400, 2]
+14:43:00 [INFO] Weighted rewards: [400]
+14:43:00 [INFO] Loss tensor: [1] [31488.546875]
+14:43:01 [INFO] Mean epoch policy entropy for the trajectories is: 0.55075717
+14:43:05 [INFO] Training epoch 30
+14:43:06 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:43:06 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:43:06 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:43:06 [INFO] Unweighted rewards: [400, 2]
+14:43:06 [INFO] Weighted rewards: [400]
+14:43:06 [INFO] Loss tensor: [1] [40333.79296875]
+14:43:06 [INFO] Mean epoch policy entropy for the trajectories is: 0.54909855
+14:43:11 [INFO] Training epoch 31
+14:43:12 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:43:12 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:43:12 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:43:12 [INFO] Unweighted rewards: [400, 2]
+14:43:12 [INFO] Weighted rewards: [400]
+14:43:12 [INFO] Loss tensor: [1] [18905.28515625]
+14:43:12 [INFO] Mean epoch policy entropy for the trajectories is: 0.49996567
+14:43:17 [INFO] Training epoch 32
+14:43:18 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:43:18 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:43:18 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:43:18 [INFO] Unweighted rewards: [400, 2]
+14:43:18 [INFO] Weighted rewards: [400]
+14:43:18 [INFO] Loss tensor: [1] [35186.296875]
+14:43:18 [INFO] Mean epoch policy entropy for the trajectories is: 0.5197872
+14:43:23 [INFO] Training epoch 33
+14:43:24 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:43:24 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:43:24 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:43:24 [INFO] Unweighted rewards: [400, 2]
+14:43:24 [INFO] Weighted rewards: [400]
+14:43:24 [INFO] Loss tensor: [1] [32586.912109375]
+14:43:24 [INFO] Mean epoch policy entropy for the trajectories is: 0.4705861
+14:43:28 [INFO] Training epoch 34
+14:43:30 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:43:30 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:43:30 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:43:30 [INFO] Unweighted rewards: [400, 2]
+14:43:30 [INFO] Weighted rewards: [400]
+14:43:30 [INFO] Loss tensor: [1] [-26676.611328125]
+14:43:30 [INFO] Mean epoch policy entropy for the trajectories is: 0.44260797
+14:43:34 [INFO] Training epoch 35
+14:43:36 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:43:36 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:43:36 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:43:36 [INFO] Unweighted rewards: [400, 2]
+14:43:36 [INFO] Weighted rewards: [400]
+14:43:36 [INFO] Loss tensor: [1] [21553.6640625]
+14:43:36 [INFO] Mean epoch policy entropy for the trajectories is: 0.42912567
+14:43:40 [INFO] Training epoch 36
+14:43:42 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:43:42 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:43:42 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:43:42 [INFO] Unweighted rewards: [400, 2]
+14:43:42 [INFO] Weighted rewards: [400]
+14:43:42 [INFO] Loss tensor: [1] [11257.1826171875]
+14:43:42 [INFO] Mean epoch policy entropy for the trajectories is: 0.39000648
+14:43:46 [INFO] Training epoch 37
+14:43:48 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:43:48 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:43:48 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:43:48 [INFO] Unweighted rewards: [400, 2]
+14:43:48 [INFO] Weighted rewards: [400]
+14:43:48 [INFO] Loss tensor: [1] [-25923.427734375]
+14:43:48 [INFO] Mean epoch policy entropy for the trajectories is: 0.35571778
+14:43:52 [INFO] Training epoch 38
+14:43:54 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:43:54 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:43:54 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:43:54 [INFO] Unweighted rewards: [400, 2]
+14:43:54 [INFO] Weighted rewards: [400]
+14:43:54 [INFO] Loss tensor: [1] [18038.208984375]
+14:43:54 [INFO] Mean epoch policy entropy for the trajectories is: 0.374197
+14:43:58 [INFO] Training epoch 39
+14:44:00 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:44:00 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:44:00 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:44:00 [INFO] Unweighted rewards: [400, 2]
+14:44:00 [INFO] Weighted rewards: [400]
+14:44:00 [INFO] Loss tensor: [1] [11875.0576171875]
+14:44:00 [INFO] Mean epoch policy entropy for the trajectories is: 0.3482503
+14:44:04 [INFO] Training epoch 40
+14:44:06 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:44:06 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:44:06 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:44:06 [INFO] Unweighted rewards: [400, 2]
+14:44:06 [INFO] Weighted rewards: [400]
+14:44:06 [INFO] Loss tensor: [1] [16822.13671875]
+14:44:06 [INFO] Mean epoch policy entropy for the trajectories is: 0.3460622
+14:44:10 [INFO] Training epoch 41
+14:44:12 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:44:12 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:44:12 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:44:12 [INFO] Unweighted rewards: [400, 2]
+14:44:12 [INFO] Weighted rewards: [400]
+14:44:12 [INFO] Loss tensor: [1] [27410.94921875]
+14:44:12 [INFO] Mean epoch policy entropy for the trajectories is: 0.3585714
+14:44:16 [INFO] Training epoch 42
+14:44:18 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:44:18 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:44:18 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:44:18 [INFO] Unweighted rewards: [400, 2]
+14:44:18 [INFO] Weighted rewards: [400]
+14:44:18 [INFO] Loss tensor: [1] [26369.78515625]
+14:44:18 [INFO] Mean epoch policy entropy for the trajectories is: 0.39135835
+14:44:22 [INFO] Training epoch 43
+14:44:24 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:44:24 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:44:24 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:44:24 [INFO] Unweighted rewards: [400, 2]
+14:44:24 [INFO] Weighted rewards: [400]
+14:44:24 [INFO] Loss tensor: [1] [23352.4453125]
+14:44:24 [INFO] Mean epoch policy entropy for the trajectories is: 0.389079
+14:44:28 [INFO] Training epoch 44
+14:44:30 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:44:30 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:44:30 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:44:30 [INFO] Unweighted rewards: [400, 2]
+14:44:30 [INFO] Weighted rewards: [400]
+14:44:30 [INFO] Loss tensor: [1] [7443.94091796875]
+14:44:30 [INFO] Mean epoch policy entropy for the trajectories is: 0.37473026
+14:44:34 [INFO] Training epoch 45
+14:44:36 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:44:36 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:44:36 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:44:36 [INFO] Unweighted rewards: [400, 2]
+14:44:36 [INFO] Weighted rewards: [400]
+14:44:36 [INFO] Loss tensor: [1] [23556.466796875]
+14:44:36 [INFO] Mean epoch policy entropy for the trajectories is: 0.34112212
+14:44:40 [INFO] Training epoch 46
+14:44:42 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:44:42 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:44:42 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:44:42 [INFO] Unweighted rewards: [400, 2]
+14:44:42 [INFO] Weighted rewards: [400]
+14:44:42 [INFO] Loss tensor: [1] [6935.2236328125]
+14:44:42 [INFO] Mean epoch policy entropy for the trajectories is: 0.35558048
+14:44:46 [INFO] Training epoch 47
+14:44:48 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:44:48 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:44:48 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:44:48 [INFO] Unweighted rewards: [400, 2]
+14:44:48 [INFO] Weighted rewards: [400]
+14:44:48 [INFO] Loss tensor: [1] [4944.34033203125]
+14:44:48 [INFO] Mean epoch policy entropy for the trajectories is: 0.3131415
+14:44:52 [INFO] Training epoch 48
+14:44:54 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:44:54 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:44:54 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:44:54 [INFO] Unweighted rewards: [400, 2]
+14:44:54 [INFO] Weighted rewards: [400]
+14:44:54 [INFO] Loss tensor: [1] [4441.15673828125]
+14:44:54 [INFO] Mean epoch policy entropy for the trajectories is: 0.3212602
+14:44:58 [INFO] Training epoch 49
+14:45:00 [INFO] Size of logits & moves [400, 2, 13] [400, 2] Tensor[[400, 2, 1], Int64]
+14:45:00 [INFO] Size of sampled logits tensor [400, 2, 1]
+14:45:00 [INFO] Tensors for calculating policy loss, log_probs: [400, 2, 1] & rewards: [400, 2]
+14:45:00 [INFO] Unweighted rewards: [400, 2]
+14:45:00 [INFO] Weighted rewards: [400]
+14:45:00 [INFO] Loss tensor: [1] [13141.1298828125]
+14:45:00 [INFO] Mean epoch policy entropy for the trajectories is: 0.30593005
+14:45:04 [INFO] The random scrambling applied these moves: [[DPlus, RMinus], [RPlus, FPlus], [BPlus, LMinus], [RMinus, DMinus], [FPlus, FPlus], [RPlus, BPlus], [UMinus, UPlus], [BMinus, FMinus], [LPlus, UMinus], [LPlus, LPlus]] for testing
+14:45:04 [INFO] Running the test loop now: 
+14:45:04 [INFO] Number of tests: 10
+14:45:04 [INFO] Scrambled cube used for test 0 used this moves: [DPlus, RMinus]
+14:45:04 [INFO] Got the cubemove from policy: DMinus for turn 0
+14:45:04 [INFO] The above is complementary or not: false
+14:45:04 [INFO] The cross entropy for turn 0 0.110143624
+14:45:04 [INFO] Got the cubemove from policy: FMinus for turn 1
+14:45:04 [INFO] The above is complementary or not: false
+14:45:04 [INFO] The cross entropy for turn 1 1.0115651
+14:45:04 [INFO] Scrambled cube used for test 1 used this moves: [RPlus, FPlus]
+14:45:04 [INFO] Got the cubemove from policy: FMinus for turn 0
+14:45:04 [INFO] The above is complementary or not: true
+14:45:04 [INFO] The cross entropy for turn 0 0.011746902
+14:45:04 [INFO] Got the cubemove from policy: RMinus for turn 1
+14:45:04 [INFO] The above is complementary or not: true
+14:45:04 [INFO] The cross entropy for turn 1 0.005671543
+14:45:04 [INFO] Scrambled cube used for test 2 used this moves: [BPlus, LMinus]
+14:45:04 [INFO] Got the cubemove from policy: BMinus for turn 0
+14:45:04 [INFO] The above is complementary or not: false
+14:45:04 [INFO] The cross entropy for turn 0 0.19111246
+14:45:04 [INFO] Got the cubemove from policy: NoOp for turn 1
+14:45:04 [INFO] The above is complementary or not: false
+14:45:04 [INFO] The cross entropy for turn 1 0.9702532
+14:45:04 [INFO] Scrambled cube used for test 3 used this moves: [RMinus, DMinus]
+14:45:04 [INFO] Got the cubemove from policy: NoOp for turn 0
+14:45:04 [INFO] The above is complementary or not: false
+14:45:04 [INFO] The cross entropy for turn 0 1.4554598
+14:45:04 [INFO] Got the cubemove from policy: DMinus for turn 1
+14:45:04 [INFO] The above is complementary or not: false
+14:45:04 [INFO] The cross entropy for turn 1 1.4554598
+14:45:04 [INFO] Scrambled cube used for test 4 used this moves: [FPlus, FPlus]
+14:45:04 [INFO] Got the cubemove from policy: FMinus for turn 0
+14:45:04 [INFO] The above is complementary or not: true
+14:45:04 [INFO] The cross entropy for turn 0 0.049388424
+14:45:04 [INFO] Got the cubemove from policy: FMinus for turn 1
+14:45:04 [INFO] The above is complementary or not: true
+14:45:04 [INFO] The cross entropy for turn 1 0.001156837
+14:45:04 [INFO] Scrambled cube used for test 5 used this moves: [RPlus, BPlus]
+14:45:04 [INFO] Got the cubemove from policy: BMinus for turn 0
+14:45:04 [INFO] The above is complementary or not: true
+14:45:04 [INFO] The cross entropy for turn 0 0.035170175
+14:45:04 [INFO] Got the cubemove from policy: RMinus for turn 1
+14:45:04 [INFO] The above is complementary or not: true
+14:45:04 [INFO] The cross entropy for turn 1 0.005671543
+14:45:04 [INFO] Scrambled cube used for test 6 used this moves: [UMinus, UPlus]
+14:45:04 [INFO] Got the cubemove from policy: NoOp for turn 0
+14:45:04 [INFO] The above is complementary or not: false
+14:45:04 [INFO] The cross entropy for turn 0 2.067282e-5
+14:45:04 [INFO] Got the cubemove from policy: NoOp for turn 1
+14:45:04 [INFO] The above is complementary or not: false
+14:45:04 [INFO] The cross entropy for turn 1 2.067282e-5
+14:45:04 [INFO] Scrambled cube used for test 7 used this moves: [BMinus, FMinus]
+14:45:04 [INFO] Got the cubemove from policy: BPlus for turn 0
+14:45:04 [INFO] The above is complementary or not: false
+14:45:04 [INFO] The cross entropy for turn 0 0.008934981
+14:45:04 [INFO] Got the cubemove from policy: FMinus for turn 1
+14:45:04 [INFO] The above is complementary or not: false
+14:45:04 [INFO] The cross entropy for turn 1 0.4751241
+14:45:04 [INFO] Scrambled cube used for test 8 used this moves: [LPlus, UMinus]
+14:45:04 [INFO] Got the cubemove from policy: UPlus for turn 0
+14:45:04 [INFO] The above is complementary or not: true
+14:45:04 [INFO] The cross entropy for turn 0 0.034515895
+14:45:04 [INFO] Got the cubemove from policy: LMinus for turn 1
+14:45:04 [INFO] The above is complementary or not: true
+14:45:04 [INFO] The cross entropy for turn 1 0.00018544891
+14:45:04 [INFO] Scrambled cube used for test 9 used this moves: [LPlus, LPlus]
+14:45:04 [INFO] Got the cubemove from policy: LMinus for turn 0
+14:45:04 [INFO] The above is complementary or not: true
+14:45:04 [INFO] The cross entropy for turn 0 0.019977985
+14:45:04 [INFO] Got the cubemove from policy: LMinus for turn 1
+14:45:04 [INFO] The above is complementary or not: true
+14:45:04 [INFO] The cross entropy for turn 1 0.00018544891
+14:45:04 [INFO] Mean loss for tests 0.0
+14:45:04 [INFO] Mean entropy for tests 0.2920882
+14:45:04 [INFO] Mean correct moves for 1.0

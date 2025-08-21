@@ -1,18 +1,21 @@
 use crate::{rubiks_cube_interface::RubiksCubeModelInterface};
 use simplelog::*;
-use std::fs::File;
+use std::{fs::File, str::FromStr};
 use log::{info};
+use chrono::{DateTime, Utc};
 
 pub mod rubiks;
 pub mod rubiks_solver;
 pub mod rubiks_cube_interface;
 
 fn main() {
+    // let log_file = 
+    //    Utc::now().format("%Y-%m-%d %H:%M:%S") + "run";
     CombinedLogger::init(
         vec![
             TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
             TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
-            WriteLogger::new(LevelFilter::Info, Config::default(), File::create("run_1.log").unwrap()),
+            WriteLogger::new(LevelFilter::Info, Config::default(), File::create("run_7.log").unwrap()),
         ]
     ).unwrap();
     //Start the training: 
