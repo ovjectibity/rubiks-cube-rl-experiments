@@ -1,18 +1,25 @@
 use crate::rubiks::{CubeMove, Cubelet, FaceColor, RubiksCube, SlottedCubelet};
 use log::info;
 use rand::Rng;
-use tch::{Tensor, nn, nn::Module, nn::OptimizerConfig, no_grad};
+use tch::{nn::{self, Module, OptimizerConfig}, no_grad, Tensor, TensorIndexer};
+
+pub enum RLAlgorithm {
+    PPO(PPOSolver),
+    VPG(VPGSolver),
+}
 
 pub struct Trajectory {
     moves: Vec<CubeMove>,
     //Shape of logits: [num_possible_moves,trajectory_depth]
     logits: Tensor,
     rewards: Vec<f32>,
+    cube_states: Tensor
 }
 
 impl Trajectory {
-    fn new(moves: Vec<CubeMove>, logits: Tensor, rewards: Vec<f32>) -> Self {
+    fn new(cube_states: Tensor, moves: Vec<CubeMove>, logits: Tensor, rewards: Vec<f32>) -> Self {
         let mut traj = Trajectory {
+            cube_states: cube_states,
             moves: moves,
             logits: logits,
             rewards: rewards,
@@ -45,6 +52,18 @@ impl Trajectory {
     }
 }
 
+// struct PPOSolver {
+//     policy: nn::Sequential,
+//     store: nn::VarStore,
+//     optim: nn::Optimizer,
+// }
+
+// impl PPOSolver {
+//     fn new() -> Self {
+
+//     }
+// }
+
 pub struct RubiksSolver {
     policy: nn::Sequential,
     trajectory_depth: u32,
@@ -54,6 +73,8 @@ pub struct RubiksSolver {
     pub num_epochs: u32,
     store: nn::VarStore,
     optim: nn::Optimizer,
+    algo: RLAlgorithm,
+    advnet: Option<nn::Sequential>,
 }
 
 //Uses the policy gradient algorithm
@@ -84,6 +105,8 @@ impl RubiksSolver {
             trajectory_depth: trajectory_depth,
             store: pols.1,
             optim: optim,
+            algo: RLAlgorithm::VPG,
+            advnet: None,
         }
     }
 
@@ -404,6 +427,64 @@ impl RubiksSolver {
         }
     }
 
+    fn get_cube_mov_rep(mv: &CubeMove) -> tch::Tensor {
+        let mv_slice = match mv {
+            CubeMove::LPlus => {
+                vec![1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+            CubeMove::LMinus => {
+                vec![0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+            CubeMove::RPlus => {
+                vec![0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+            CubeMove::RMinus => {
+                vec![0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+            CubeMove::UPlus => {
+                vec![0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+            CubeMove::UMinus => {
+                vec![0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+            CubeMove::DPlus => {
+                vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+            CubeMove::DMinus => {
+                vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }
+            CubeMove::BPlus => {
+                vec![1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+            }
+            CubeMove::BMinus => {
+                vec![1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+            }
+            CubeMove::FPlus => {
+                vec![1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]
+            }
+            CubeMove::FMinus => {
+                vec![1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+            }
+            CubeMove::NoOp => {
+                vec![1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+            }
+        };
+        Tensor::from_slice(mv_slice)
+    }
+
     pub fn gen_input_representation(cube: &RubiksCube) -> tch::Tensor {
         let mut t = tch::Tensor::empty(&[0, 1], (tch::Kind::Float, tch::Device::Cpu));
         let cube_slot_map = cube.cube_slot_map.borrow();
@@ -433,6 +514,7 @@ impl RubiksSolver {
         let mut trajectory_moves = Vec::new();
         let mut trajectory_rewards = Vec::new();
         let mut trajectory_logits = Tensor::empty([0], (tch::Kind::Float, tch::Device::Mps));
+        let mut trajectory_cube_states = Tensor::empty([0], (tch::Kind::Float, tch::Device::Mps));
         let mut current_cube = cube_start;
         for i in 0..self.trajectory_depth {
             let input = Self::gen_input_representation(&current_cube);
@@ -445,6 +527,10 @@ impl RubiksSolver {
             // info!("Computed the mv & the o to be: {} for mv {:?}",r_t,mv);
             trajectory_moves.push(mv);
             trajectory_logits = tch::Tensor::concat(&[trajectory_logits, output], 0);
+            trajectory_cube_states = 
+                tch::Tensor::concat(
+                    &[trajectory_cube_states,
+                    Self::gen_input_representation(&cube_t)], 0);
             trajectory_rewards.push(r_t);
             current_cube = cube_t;
         }
@@ -454,7 +540,11 @@ impl RubiksSolver {
             trajectory_rewards,
             trajectory_logits.size()
         );
-        Trajectory::new(trajectory_moves, trajectory_logits, trajectory_rewards)
+        Trajectory::new(
+                trajectory_cube_states, 
+                trajectory_moves, 
+                trajectory_logits, 
+                trajectory_rewards)
     }
 
     pub fn gen_trajectories(&self, cube_start: Vec<RubiksCube>) -> Vec<Trajectory> {
@@ -523,33 +613,9 @@ impl RubiksSolver {
 
     //Running the training simulation involves for an epoc
     //Involves collection of n trajectories with m moves
-    //Render those moves, with each new traj refresh all data
-    //Showcase that in the window
-    pub fn train_an_epoch(&mut self, trajs: Vec<Trajectory>) {
-        //Collect rewards tensor
-        let rewards: Vec<f32> = trajs
-            .iter()
-            .flat_map(|trajectory| trajectory.rewards.clone())
-            .collect();
-        let rewards_t = Tensor::f_from_slice(&rewards)
-            .unwrap()
-            .reshape(&[self.num_trajectories as i64, self.trajectory_depth as i64]);
-
-        //Get move tensor:
-        let move_indices_l: Vec<Vec<i64>> = trajs
-            .iter()
-            .map(|trajectory| {
-                trajectory
-                    .moves
-                    .iter()
-                    .map(|f| Self::get_cube_move_index(f) as i64)
-                    .collect::<Vec<i64>>()
-            })
-            .collect();
-        let move_indices: Vec<i64> = move_indices_l.iter().flat_map(|e| e.clone()).collect();
-        let mv_t = Tensor::f_from_slice(&move_indices)
-            .unwrap()
-            .reshape(&[self.num_trajectories as i64, self.trajectory_depth as i64]);
+    pub fn train_an_epoch_vpg(&mut self, trajs: Vec<Trajectory>) {
+        let rewards_t = Self::get_rewards_tensor(&trajs);
+        let mv_t = Self::get_moves_tensor(&trajs);
 
         //Get input tensor  of shape [num_trajectories, traj_depth, input]
         let all_traj_logits_l: Vec<&Tensor> =
@@ -574,5 +640,58 @@ impl RubiksSolver {
         self.optim.zero_grad();
         expected_reward.backward();
         self.optim.step();
+    }
+
+    fn get_rewards_tensor(trajs: &Vec<Trajectory>) -> Tensor {
+        //Collect rewards tensor
+        let rewards: Vec<f32> = trajs
+            .iter()
+            .flat_map(|trajectory| trajectory.rewards.clone())
+            .collect();
+        let rewards_t = Tensor::f_from_slice(&rewards)
+            .unwrap()
+            .reshape(&[self.num_trajectories as i64, self.trajectory_depth as i64]);
+        rewards_t
+    }
+
+    fn get_moves_tensor(trajs: &Vec<Trajectory>) -> Tensor {
+        //Get move tensor:
+        let move_indices_l: Vec<Vec<i64>> = trajs
+            .iter()
+            .map(|trajectory| {
+                trajectory
+                    .moves
+                    .iter()
+                    .map(|f| Self::get_cube_move_index(f) as i64)
+                    .collect::<Vec<i64>>()
+            })
+            .collect();
+        let move_indices: Vec<i64> = move_indices_l.iter().flat_map(|e| e.clone()).collect();
+        let mv_t = Tensor::f_from_slice(&move_indices)
+            .unwrap()
+            .reshape(&[self.num_trajectories as i64, self.trajectory_depth as i64]);
+        mv_t
+    }
+
+    fn get_advantages_tensor(advnet: nn::Sequential, trajs: &Vec<Trajectory>) -> Tensor {
+        trajs.iter().flat_map(|traj| {
+            //Input tensor for advnet [rep_size + move_rep,1]
+            let advantages = advnet.forward(xs);
+        });
+    }
+
+    fn get_added_advantage_tensor(on_pol_adv: Tensor, trajs: &Vec<Trajectory>) -> Tensor {
+        //Collect the prob-logits for the target policy moves of size [num_trajectories, trajectory, 1]
+        //Collect the prob-logits for the trained policy moves of size 
+        //Clip on the basis of added advantage
+
+    }
+
+    pub fn train_an_epoch_ppo(&mut self, trajs: Vec<Trajectory>) {
+        //Get the advantage tensor for the trajectory:
+
+        //Get the added advantage tensor for the trajectory:
+        // GD on the loss for training policy:
+        // GD on the mean square loss b/w the advantage & the rtg tensor to train
     }
 }
