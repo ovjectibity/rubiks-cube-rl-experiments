@@ -65,8 +65,13 @@ impl RubiksSolver {
         num_trajectories: u32,
         trajectory_depth: u32,
         learning_rate: f64,
+        load_from_file: Option<String>,
     ) -> Self {
-        let pols = Self::init_policy(hidden_layer_dimension as i64, num_layers as i64);
+        let pols = Self::init_policy(
+            load_from_file,
+            hidden_layer_dimension as i64,
+            num_layers as i64,
+        );
         let mut optim = nn::Adam::default().build(&pols.1, learning_rate).unwrap();
         optim.set_weight_decay(1e-3);
 
@@ -82,8 +87,17 @@ impl RubiksSolver {
         }
     }
 
-    fn init_policy(hidden_layer_dimension: i64, num_layers: i64) -> (nn::Sequential, nn::VarStore) {
-        let vs = nn::VarStore::new(tch::Device::Mps);
+    pub fn save_policy(&self, path: String) {
+        //Save trained policy to storage:
+        self.store.save(path);
+    }
+
+    fn init_policy(
+        load_from_file: Option<String>,
+        hidden_layer_dimension: i64,
+        num_layers: i64,
+    ) -> (nn::Sequential, nn::VarStore) {
+        let mut vs = nn::VarStore::new(tch::Device::Mps);
         let vs_p = vs.root();
         let mut y = nn::seq()
             .add(nn::linear(
@@ -112,16 +126,20 @@ impl RubiksSolver {
             ))
             .add_fn(Tensor::relu)
             .add_fn(|xs| xs.softmax(-1, tch::Kind::Float));
-        //Initialise the tensors uniformly in the policy network:
-        no_grad(|| {
-            for (name, mut tensor) in vs.variables() {
-                if name.ends_with("weight") {
-                    tensor.uniform_(-0.05, 0.05); // in-place
-                } else if name.ends_with("bias") {
-                    tensor.zero_();
+        if let Some(path) = load_from_file {
+            vs.load(path);
+        } else {
+            //Initialise the tensors uniformly in the policy network:
+            no_grad(|| {
+                for (name, mut tensor) in vs.variables() {
+                    if name.ends_with("weight") {
+                        tensor.uniform_(-0.05, 0.05); // in-place
+                    } else if name.ends_with("bias") {
+                        tensor.zero_();
+                    }
                 }
-            }
-        });
+            });
+        }
         (y, vs)
     }
 
